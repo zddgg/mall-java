@@ -15,18 +15,16 @@ import java.io.Serializable;
 @Data
 public class RegionCity extends BaseEntity implements Serializable {
 
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
     /**
      *
      */
     @TableField(value = "city_code")
     private String cityCode;
-
     /**
      *
      */
     @TableField(value = "city_name")
     private String cityName;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

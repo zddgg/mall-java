@@ -13,13 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class MinioController {
 
+    private final MinioService minioService;
     @Value("${minio.endpoint}")
     private String address;
-
     @Value("${minio.bucketName}")
     private String bucketName;
-
-    private final MinioService minioService;
 
     public MinioController(MinioService minioService) {
         this.minioService = minioService;

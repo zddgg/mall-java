@@ -1,10 +1,12 @@
 package com.zddgg.mall.product.exception;
 
-import com.voidtime.mall.common.enums.SystemEnum;
-import com.voidtime.mall.product.constant.RespEnum;
-import lombok.Data;
+import com.zddgg.mall.common.enums.SystemEnum;
+import com.zddgg.mall.product.constant.RespEnum;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class BizException extends RuntimeException {
 
     private String code;

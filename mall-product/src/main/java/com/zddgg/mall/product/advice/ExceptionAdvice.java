@@ -1,8 +1,8 @@
 package com.zddgg.mall.product.advice;
 
-import com.voidtime.mall.common.enums.SystemEnum;
-import com.voidtime.mall.common.response.Result;
-import com.voidtime.mall.product.exception.BizException;
+import com.zddgg.mall.common.enums.SystemEnum;
+import com.zddgg.mall.common.response.Result;
+import com.zddgg.mall.product.exception.BizException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.BindException;

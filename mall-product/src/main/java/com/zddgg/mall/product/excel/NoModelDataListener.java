@@ -3,12 +3,12 @@ package com.zddgg.mall.product.excel;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.excel.util.ListUtils;
-import com.voidtime.mall.product.entity.RegionCity;
-import com.voidtime.mall.product.entity.RegionDistrict;
-import com.voidtime.mall.product.entity.RegionProvince;
-import com.voidtime.mall.product.service.RegionCityService;
-import com.voidtime.mall.product.service.RegionDistrictService;
-import com.voidtime.mall.product.service.RegionProvinceService;
+import com.zddgg.mall.product.entity.RegionCity;
+import com.zddgg.mall.product.entity.RegionDistrict;
+import com.zddgg.mall.product.entity.RegionProvince;
+import com.zddgg.mall.product.service.RegionCityService;
+import com.zddgg.mall.product.service.RegionDistrictService;
+import com.zddgg.mall.product.service.RegionProvinceService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -21,14 +21,10 @@ public class NoModelDataListener extends AnalysisEventListener<Map<Integer, Stri
      * 每隔5条存储数据库，实际使用中可以100条，然后清理list ，方便内存回收
      */
     private static final int BATCH_COUNT = 2000;
-
-    private List<Map<Integer, String>> cachedDataList = ListUtils.newArrayListWithExpectedSize(BATCH_COUNT);
-
     private final RegionProvinceService provinceService;
-
     private final RegionCityService cityService;
-
     private final RegionDistrictService districtService;
+    private List<Map<Integer, String>> cachedDataList = ListUtils.newArrayListWithExpectedSize(BATCH_COUNT);
 
     public NoModelDataListener(RegionProvinceService provinceService,
                                RegionCityService cityService,

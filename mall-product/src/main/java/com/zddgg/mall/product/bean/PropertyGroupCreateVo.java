@@ -1,6 +1,6 @@
 package com.zddgg.mall.product.bean;
 
-import com.voidtime.mall.product.entity.PropertyUnitKey;
+import com.zddgg.mall.product.entity.PropertyUnitKey;
 import lombok.Data;
 
 import java.util.List;

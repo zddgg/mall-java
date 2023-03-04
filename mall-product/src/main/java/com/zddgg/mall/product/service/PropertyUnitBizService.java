@@ -1,8 +1,8 @@
 package com.zddgg.mall.product.service;
 
-import com.voidtime.mall.product.bean.PropertyUnitCreateReqVo;
-import com.voidtime.mall.product.bean.PropertyUnitDeleteReqVo;
-import com.voidtime.mall.product.entity.PropertyUnitKey;
+import com.zddgg.mall.product.bean.PropertyUnitCreateReqVo;
+import com.zddgg.mall.product.bean.PropertyUnitDeleteReqVo;
+import com.zddgg.mall.product.entity.PropertyUnitKey;
 
 import java.util.List;
 

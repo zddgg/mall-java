@@ -28,13 +28,11 @@ import java.util.stream.Collectors;
 @Service
 public class MinioService {
 
+    private final MinioClient minioClient;
     @Value("${minio.endpoint}")
     private String address;
-
     @Value("${minio.bucketName}")
     private String bucketName;
-
-    private final MinioClient minioClient;
 
     public MinioService(MinioClient minioClient) {
         this.minioClient = minioClient;

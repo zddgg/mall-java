@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.service.impl;
 
-import com.voidtime.mall.product.service.IdService;
-import com.voidtime.mall.product.utils.IdUtil;
+import com.zddgg.mall.product.service.IdService;
+import com.zddgg.mall.product.utils.IdUtil;
 import org.springframework.stereotype.Service;
 
 @Service

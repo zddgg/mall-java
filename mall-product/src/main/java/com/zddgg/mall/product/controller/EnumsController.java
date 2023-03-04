@@ -1,9 +1,9 @@
 package com.zddgg.mall.product.controller;
 
-import com.voidtime.mall.common.response.Result;
-import com.voidtime.mall.product.bean.EnumReqVo;
-import com.voidtime.mall.product.bean.SelectOptionData;
-import com.voidtime.mall.product.constant.property.PropertyEnums;
+import com.zddgg.mall.common.response.Result;
+import com.zddgg.mall.product.bean.EnumReqVo;
+import com.zddgg.mall.product.bean.SelectOptionData;
+import com.zddgg.mall.product.constant.property.PropertyEnums;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

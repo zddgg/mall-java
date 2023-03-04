@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.voidtime.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyGroupStore;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 

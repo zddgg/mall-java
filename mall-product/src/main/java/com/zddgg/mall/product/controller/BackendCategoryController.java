@@ -1,11 +1,11 @@
 package com.zddgg.mall.product.controller;
 
-import com.voidtime.mall.common.response.PaginationRes;
-import com.voidtime.mall.common.response.Result;
-import com.voidtime.mall.product.bean.*;
-import com.voidtime.mall.product.biz.service.BackendCategoryBizService;
-import com.voidtime.mall.product.entity.BackendCategory;
-import com.voidtime.mall.product.service.BackendCategoryService;
+import com.zddgg.mall.common.response.PaginationRes;
+import com.zddgg.mall.common.response.Result;
+import com.zddgg.mall.product.bean.*;
+import com.zddgg.mall.product.entity.BackendCategory;
+import com.zddgg.mall.product.service.BackendCategoryBizService;
+import com.zddgg.mall.product.service.BackendCategoryService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

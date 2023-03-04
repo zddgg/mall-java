@@ -1,17 +1,17 @@
 package com.zddgg.mall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.voidtime.mall.product.bean.PropertyGroupCreateVo;
-import com.voidtime.mall.product.bean.PropertyGroupDetailReqVo;
-import com.voidtime.mall.product.biz.service.PropertyGroupBizService;
-import com.voidtime.mall.product.biz.service.PropertyUnitBizService;
-import com.voidtime.mall.product.constant.StatusEnum;
-import com.voidtime.mall.product.entity.PropertyGroup;
-import com.voidtime.mall.product.entity.PropertyGroupStore;
-import com.voidtime.mall.product.entity.PropertyUnitKey;
-import com.voidtime.mall.product.exception.BizException;
-import com.voidtime.mall.product.service.PropertyGroupService;
-import com.voidtime.mall.product.service.PropertyGroupStoreService;
+import com.zddgg.mall.product.bean.PropertyGroupCreateVo;
+import com.zddgg.mall.product.bean.PropertyGroupDetailReqVo;
+import com.zddgg.mall.product.constant.StatusEnum;
+import com.zddgg.mall.product.entity.PropertyGroup;
+import com.zddgg.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyUnitKey;
+import com.zddgg.mall.product.exception.BizException;
+import com.zddgg.mall.product.service.PropertyGroupBizService;
+import com.zddgg.mall.product.service.PropertyGroupService;
+import com.zddgg.mall.product.service.PropertyGroupStoreService;
+import com.zddgg.mall.product.service.PropertyUnitBizService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -116,7 +116,7 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
                     .map(PropertyGroupStore::getPropertyStoreNo).collect(Collectors.toList());
             Map<String, List<String>> group2StoreMap = propertyGroupStores.stream()
                     .collect(Collectors.groupingBy(PropertyGroupStore::getPropertyGroupNo,
-                    Collectors.mapping(PropertyGroupStore::getPropertyStoreNo, Collectors.toList())));
+                            Collectors.mapping(PropertyGroupStore::getPropertyStoreNo, Collectors.toList())));
             List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyNos(storeNos);
             Map<String, PropertyUnitKey> storeMap = propertyUnitKeys
                     .stream()

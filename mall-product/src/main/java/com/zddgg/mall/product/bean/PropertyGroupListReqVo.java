@@ -1,9 +1,11 @@
 package com.zddgg.mall.product.bean;
 
-import com.voidtime.mall.common.request.PaginationReq;
-import lombok.Data;
+import com.zddgg.mall.common.request.PaginationReq;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class PropertyGroupListReqVo extends PaginationReq {
 
     private String propertyGroupNo;

@@ -1,6 +1,6 @@
 package com.zddgg.mall.product.utils;
 
-import com.voidtime.mall.common.response.PaginationRes;
+import com.zddgg.mall.common.response.PaginationRes;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class MemoryPagination {
         int totalCount = data.size();
         int maxPage = (int) Math.ceil((double) totalCount / (double) pageSize);
         if (current > maxPage) {
-           current = maxPage;
+            current = maxPage;
         }
         List<T> records = data.stream().skip((long) (current - 1) * pageSize).limit(pageSize).collect(Collectors.toList());
         page.setTotal((long) totalCount);

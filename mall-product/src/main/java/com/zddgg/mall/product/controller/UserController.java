@@ -2,7 +2,7 @@ package com.zddgg.mall.product.controller;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.voidtime.mall.common.response.Result;
+import com.zddgg.mall.common.response.Result;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,19 +14,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("user")
 public class UserController {
-
-    @PostMapping("login")
-    public Result<Object> login(@RequestBody Map<String, String> map) {
-        HashMap<String, String> map1 = new HashMap<>();
-        map1.put("token", "1111");
-        return Result.success(map1);
-    }
-
-    @PostMapping("info")
-    public Result<Object> info() {
-        JSONObject jsonObject = JSON.parseObject(userInfo);
-        return Result.success(jsonObject);
-    }
 
     static String userInfo = "{\n" +
             "  \"name\": \"王立群\",\n" +
@@ -46,5 +33,18 @@ public class UserController {
             "  \"certification\": 1,\n" +
             "  \"role\": \"admin\"\n" +
             "}";
+
+    @PostMapping("login")
+    public Result<Object> login(@RequestBody Map<String, String> map) {
+        HashMap<String, String> map1 = new HashMap<>();
+        map1.put("token", "1111");
+        return Result.success(map1);
+    }
+
+    @PostMapping("info")
+    public Result<Object> info() {
+        JSONObject jsonObject = JSON.parseObject(userInfo);
+        return Result.success(jsonObject);
+    }
 
 }

@@ -16,27 +16,23 @@ import java.util.List;
 @Data
 public class PropertyGroup extends BaseEntity implements Serializable {
 
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
     /**
      * 属性编号
      */
     @TableField(value = "property_group_no")
     private String propertyGroupNo;
-
     /**
      * 属性名称
      */
     @TableField(value = "property_group_name")
     private String propertyGroupName;
-
     /**
      * 状态: 0-停用, 1-启用, -1-删除
      */
     @TableField(value = "status")
     private String status;
-
     @TableField(exist = false)
     private List<PropertyUnitKey> propertyStoreList;
-
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
 }

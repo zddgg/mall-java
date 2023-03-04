@@ -1,11 +1,11 @@
 package com.zddgg.mall.product.service;
 
-import com.voidtime.mall.common.response.PaginationRes;
-import com.voidtime.mall.common.response.Result;
-import com.voidtime.mall.product.bean.BackendCategoryCreateReqVo;
-import com.voidtime.mall.product.bean.BackendCategoryDetailRespVo;
-import com.voidtime.mall.product.bean.BackendCategoryListVo;
-import com.voidtime.mall.product.bean.BackendCategoryNode;
+import com.zddgg.mall.common.response.PaginationRes;
+import com.zddgg.mall.common.response.Result;
+import com.zddgg.mall.product.bean.BackendCategoryCreateReqVo;
+import com.zddgg.mall.product.bean.BackendCategoryDetailRespVo;
+import com.zddgg.mall.product.bean.BackendCategoryListVo;
+import com.zddgg.mall.product.bean.BackendCategoryNode;
 
 import java.util.List;
 
