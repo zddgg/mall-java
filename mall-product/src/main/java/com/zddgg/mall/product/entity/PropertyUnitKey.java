@@ -46,5 +46,5 @@ public class PropertyUnitKey extends BaseEntity implements Serializable {
     @TableField(value = "status")
     private String status;
     @TableField(exist = false)
-    private List<propertyUnitValue> propertyUnitValues;
+    private List<PropertyUnitValue> PropertyUnitValues;
 }

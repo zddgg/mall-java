@@ -14,5 +14,5 @@ public interface PropertyGroupBizService {
 
     void delete(PropertyGroupDetailReqVo reqVo);
 
-    List<PropertyGroup> getListAndRelatedByGroupNos(List<String> groupNos);
+    List<PropertyGroup> getListAndRelatedByGroupIds(List<String> groupNos);
 }

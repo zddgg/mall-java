@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface BackendCategoryBizService {
 
-    List<BackendCategoryNode> getRootList(Integer deepLength);
+    List<BackendCategoryNode> getRootList(Integer maxLevel);
 
     BackendCategoryNode getNode(String backendCategoryNo);
 

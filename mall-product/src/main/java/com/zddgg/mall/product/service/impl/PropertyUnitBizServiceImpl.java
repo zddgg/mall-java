@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zddgg.mall.product.bean.PropertyUnitCreateReqVo;
 import com.zddgg.mall.product.bean.PropertyUnitDeleteReqVo;
 import com.zddgg.mall.product.constant.StatusEnum;
-import com.zddgg.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyGroupUnit;
 import com.zddgg.mall.product.entity.PropertyUnitKey;
-import com.zddgg.mall.product.entity.propertyUnitValue;
+import com.zddgg.mall.product.entity.PropertyUnitValue;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.PropertyGroupStoreService;
 import com.zddgg.mall.product.service.PropertyStoreValueService;
@@ -54,9 +54,9 @@ public class PropertyUnitBizServiceImpl implements PropertyUnitBizService {
         saveStoreKey.setStatus(StatusEnum.DISABLED.code);
         propertyUnitKeyService.save(saveStoreKey);
 
-        ArrayList<propertyUnitValue> valueSaveList = new ArrayList<>();
+        ArrayList<PropertyUnitValue> valueSaveList = new ArrayList<>();
         for (PropertyUnitCreateReqVo.PropertyUnitValue propertyUnitValue : vo.getPropertyUnitValues()) {
-            propertyUnitValue value = new propertyUnitValue();
+            PropertyUnitValue value = new PropertyUnitValue();
             value.setUnitKeyId(saveStoreKey.getUnitKeyId());
             value.setUnitValue(propertyUnitValue.getUnitValue());
             value.setUnitValueOrder(propertyUnitValue.getUnitValueOrder());
@@ -80,11 +80,11 @@ public class PropertyUnitBizServiceImpl implements PropertyUnitBizService {
         propertyUnitKeyService.updateById(one);
 
         propertyStoreValueService.remove(
-                new LambdaQueryWrapper<propertyUnitValue>().eq(propertyUnitValue::getUnitKeyId, one.getUnitKeyId()));
+                new LambdaQueryWrapper<PropertyUnitValue>().eq(PropertyUnitValue::getUnitKeyId, one.getUnitKeyId()));
 
-        ArrayList<propertyUnitValue> valueSaveList = new ArrayList<>();
+        ArrayList<PropertyUnitValue> valueSaveList = new ArrayList<>();
         for (PropertyUnitCreateReqVo.PropertyUnitValue propertyUnitValue : vo.getPropertyUnitValues()) {
-            propertyUnitValue value = new propertyUnitValue();
+            PropertyUnitValue value = new PropertyUnitValue();
             value.setUnitKeyId(one.getUnitKeyId());
             value.setUnitValue(propertyUnitValue.getUnitValue());
             value.setUnitValueOrder(propertyUnitValue.getUnitValueOrder());
@@ -97,18 +97,18 @@ public class PropertyUnitBizServiceImpl implements PropertyUnitBizService {
     @Override
     public void delete(PropertyUnitDeleteReqVo reqVo) {
         // 属性组关联校验
-        List<PropertyGroupStore> stores = propertyGroupStoreService.list(
-                new LambdaQueryWrapper<PropertyGroupStore>()
-                        .eq(PropertyGroupStore::getPropertyStoreNo, reqVo.getUnitKeyId()));
+        List<PropertyGroupUnit> stores = propertyGroupStoreService.list(
+                new LambdaQueryWrapper<PropertyGroupUnit>()
+                        .eq(PropertyGroupUnit::getUnitKeyId, reqVo.getUnitKeyId()));
         if (!CollectionUtils.isEmpty(stores)) {
-            throw new BizException("属性组 [" + stores.get(0).getPropertyGroupNo() + " ]已关联该属性，请先解除绑定！");
+            throw new BizException("属性组 [" + stores.get(0).getPropertyGroupId() + " ]已关联该属性，请先解除绑定！");
         }
         propertyUnitKeyService.remove(
                 new LambdaQueryWrapper<PropertyUnitKey>()
                         .eq(PropertyUnitKey::getUnitKeyId, reqVo.getUnitKeyId()));
         propertyStoreValueService.remove(
-                new LambdaQueryWrapper<propertyUnitValue>()
-                        .eq(propertyUnitValue::getUnitKeyId, reqVo.getUnitKeyId()));
+                new LambdaQueryWrapper<PropertyUnitValue>()
+                        .eq(PropertyUnitValue::getUnitKeyId, reqVo.getUnitKeyId()));
     }
 
     @Override
@@ -119,11 +119,11 @@ public class PropertyUnitBizServiceImpl implements PropertyUnitBizService {
         List<PropertyUnitKey> propertyUnitKeys = propertyUnitKeyService.list(
                 new LambdaQueryWrapper<PropertyUnitKey>()
                         .in(PropertyUnitKey::getUnitKeyId, propertyKeyNos));
-        List<propertyUnitValue> propertyUnitValues = propertyStoreValueService.list(
-                new LambdaQueryWrapper<propertyUnitValue>()
-                        .in(propertyUnitValue::getUnitKeyId, propertyKeyNos));
-        Map<String, List<propertyUnitValue>> propertyKeyNoMap = propertyUnitValues.stream()
-                .collect(Collectors.groupingBy(propertyUnitValue::getUnitKeyId));
+        List<PropertyUnitValue> PropertyUnitValues = propertyStoreValueService.list(
+                new LambdaQueryWrapper<PropertyUnitValue>()
+                        .in(PropertyUnitValue::getUnitKeyId, propertyKeyNos));
+        Map<String, List<PropertyUnitValue>> propertyKeyNoMap = PropertyUnitValues.stream()
+                .collect(Collectors.groupingBy(PropertyUnitValue::getUnitKeyId));
         propertyUnitKeys.forEach(propertyStoreKey ->
                 propertyStoreKey.setPropertyUnitValues(propertyKeyNoMap.get(propertyStoreKey.getUnitKeyId())));
         return propertyUnitKeys;
@@ -140,10 +140,10 @@ public class PropertyUnitBizServiceImpl implements PropertyUnitBizService {
         if (Objects.isNull(propertyUnitKey) || StringUtils.isBlank(propertyUnitKey.getUnitKeyId())) {
             throw new BizException("属性库查询失败！");
         }
-        List<propertyUnitValue> propertyUnitValues = propertyStoreValueService
-                .list(new LambdaQueryWrapper<propertyUnitValue>()
-                        .eq(propertyUnitValue::getUnitKeyId, propertyUnitKey.getUnitKeyId()));
-        propertyUnitKey.setPropertyUnitValues(propertyUnitValues);
+        List<PropertyUnitValue> PropertyUnitValues = propertyStoreValueService
+                .list(new LambdaQueryWrapper<PropertyUnitValue>()
+                        .eq(PropertyUnitValue::getUnitKeyId, propertyUnitKey.getUnitKeyId()));
+        propertyUnitKey.setPropertyUnitValues(PropertyUnitValues);
         return propertyUnitKey;
     }
 }

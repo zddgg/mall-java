@@ -45,13 +45,18 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         this.propertyUnitBizService = propertyUnitBizService;
     }
 
+    /**
+     * 从跟类目开始生成类目树
+     *
+     * @param maxLevel 查询的最大层级
+     * @return
+     */
     @Override
-    public List<BackendCategoryNode> getRootList(Integer deepLength) {
+    public List<BackendCategoryNode> getRootList(Integer maxLevel) {
         List<BackendCategory> backendCategories = backendCategoryService.list(
                 new LambdaQueryWrapper<BackendCategory>()
-                        .le(Objects.nonNull(deepLength), BackendCategory::getLevel, deepLength)
+                        .le(Objects.nonNull(maxLevel), BackendCategory::getLevel, maxLevel)
                         .ne(BackendCategory::getStatus, StatusEnum.DELETED.code));
-
         return getParentNoMap(backendCategories).get("0");
     }
 
@@ -122,7 +127,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
             List<CategoryPropertyGroup> saveList = propertyGroupList.stream().map((propertyGroup) -> {
                 CategoryPropertyGroup categoryPropertyGroup = new CategoryPropertyGroup();
                 categoryPropertyGroup.setCategoryNo(newBackendCategory.getCategoryId());
-                categoryPropertyGroup.setPropertyGroupNo(propertyGroup.getPropertyGroupNo());
+                categoryPropertyGroup.setPropertyGroupNo(propertyGroup.getPropertyGroupId());
                 categoryPropertyGroup.setOrderNo(0);
                 categoryPropertyGroup.setStatus(StatusEnum.DELETED.code);
                 return categoryPropertyGroup;
@@ -221,7 +226,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
             List<CategoryPropertyGroup> saveList = propertyGroupList.stream().map((propertyGroup) -> {
                 CategoryPropertyGroup categoryPropertyGroup = new CategoryPropertyGroup();
                 categoryPropertyGroup.setCategoryNo(current.getCategoryId());
-                categoryPropertyGroup.setPropertyGroupNo(propertyGroup.getPropertyGroupNo());
+                categoryPropertyGroup.setPropertyGroupNo(propertyGroup.getPropertyGroupId());
                 categoryPropertyGroup.setOrderNo(0);
                 categoryPropertyGroup.setStatus(StatusEnum.DELETED.code);
                 return categoryPropertyGroup;
@@ -297,7 +302,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
                 .stream()
                 .map(CategoryPropertyGroup::getPropertyGroupNo)
                 .collect(Collectors.toList());
-        return propertyGroupBizService.getListAndRelatedByGroupNos(groupNos);
+        return propertyGroupBizService.getListAndRelatedByGroupIds(groupNos);
     }
 
     private List<PropertyUnitKey> getPropertyStoreList(String backendCategoryNo) {

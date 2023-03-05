@@ -12,5 +12,5 @@ public class PropertyGroupDetailRespVo {
 
     private String propertyGroupName;
 
-    private List<PropertyUnitKey> propertyStoreList;
+    private List<PropertyUnitKey> propertyUnitKeys;
 }

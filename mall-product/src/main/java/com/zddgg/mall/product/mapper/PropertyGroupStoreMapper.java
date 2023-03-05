@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.zddgg.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyGroupUnit;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
-public interface PropertyGroupStoreMapper extends BaseMapper<PropertyGroupStore> {
+public interface PropertyGroupStoreMapper extends BaseMapper<PropertyGroupUnit> {
 
 }
 

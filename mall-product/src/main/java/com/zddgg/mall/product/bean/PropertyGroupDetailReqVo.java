@@ -8,5 +8,5 @@ import javax.validation.constraints.NotBlank;
 public class PropertyGroupDetailReqVo {
 
     @NotBlank(message = "属性组编号不能为空")
-    private String propertyGroupNo;
+    private String propertyGroupId;
 }

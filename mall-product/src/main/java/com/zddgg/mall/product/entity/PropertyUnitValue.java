@@ -15,7 +15,7 @@ import java.io.Serializable;
 @TableName(value = "property_unit_value")
 @Getter
 @Setter
-public class propertyUnitValue extends BaseEntity implements Serializable {
+public class PropertyUnitValue extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

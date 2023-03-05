@@ -5,5 +5,7 @@ import lombok.Data;
 @Data
 public class BackendCategoryTreeQueryVo {
 
-    private Integer deepLength;
+    private Integer maxLevel;
+
+    private Boolean rootHelp = false;
 }
