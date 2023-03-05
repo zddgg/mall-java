@@ -3,6 +3,7 @@ package com.zddgg.mall.product.utils;
 import com.zddgg.mall.common.response.PaginationRes;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ public class MemoryPagination {
             page.setTotal(0L);
             page.setCurrent(current);
             page.setPageSize(pageSize);
+            page.setRecords(new ArrayList<>());
             return page;
         }
         int totalCount = data.size();
@@ -29,7 +31,7 @@ public class MemoryPagination {
         if (current > maxPage) {
             current = maxPage;
         }
-        List<T> records = data.stream().skip((long) (current - 1) * pageSize).limit(pageSize).collect(Collectors.toList());
+        List<T> records = data.stream().skip((current - 1) * pageSize).limit(pageSize).collect(Collectors.toList());
         page.setTotal((long) totalCount);
         page.setCurrent(current);
         page.setPageSize(pageSize);

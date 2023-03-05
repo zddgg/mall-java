@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -36,7 +37,17 @@ public class BackendCategoryController {
 
     @PostMapping("tree")
     public Result<List<BackendCategoryNode>> tree(@RequestBody BackendCategoryTreeQueryVo vo) {
-        return Result.success(backendCategoryBizService.getRootList(vo.getDeepLength()));
+        List<BackendCategoryNode> list = backendCategoryBizService.getRootList(vo.getMaxLevel());
+        if (vo.getRootHelp()) {
+            List<BackendCategoryNode> result = new ArrayList<>();
+            BackendCategoryNode root = new BackendCategoryNode();
+            root.setCategoryId("0");
+            root.setCategoryName("根类目");
+            result.add(root);
+            result.addAll(list);
+            list = result;
+        }
+        return Result.success(list);
     }
 
     @PostMapping("create")

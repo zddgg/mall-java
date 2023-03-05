@@ -8,9 +8,9 @@ import java.util.List;
 @Data
 public class PropertyGroupCreateVo {
 
-    private String propertyGroupNo;
+    private String propertyGroupId;
 
     private String propertyGroupName;
 
-    private List<PropertyUnitKey> propertyStoreList;
+    private List<PropertyUnitKey> propertyUnitKeys;
 }

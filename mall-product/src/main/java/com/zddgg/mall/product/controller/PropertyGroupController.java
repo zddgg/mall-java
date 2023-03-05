@@ -8,9 +8,9 @@ import com.zddgg.mall.product.bean.PropertyGroupDetailReqVo;
 import com.zddgg.mall.product.bean.PropertyGroupDetailRespVo;
 import com.zddgg.mall.product.bean.PropertyGroupListReqVo;
 import com.zddgg.mall.product.entity.PropertyGroup;
-import com.zddgg.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyGroupUnit;
 import com.zddgg.mall.product.entity.PropertyUnitKey;
-import com.zddgg.mall.product.entity.propertyUnitValue;
+import com.zddgg.mall.product.entity.PropertyUnitValue;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.*;
 import org.apache.commons.lang3.StringUtils;
@@ -55,11 +55,11 @@ public class PropertyGroupController {
         queryWrapper.like(StringUtils.isNoneBlank(reqVo.getPropertyGroupName()), PropertyGroup::getPropertyGroupName, reqVo.getPropertyGroupName());
         Page<PropertyGroup> page = new Page<>(reqVo.getCurrent(), reqVo.getPageSize());
         propertyGroupService.page(page, queryWrapper);
-        List<String> groupNos = page.getRecords()
+        List<String> groupIds = page.getRecords()
                 .stream()
-                .map(PropertyGroup::getPropertyGroupNo)
+                .map(PropertyGroup::getPropertyGroupId)
                 .collect(Collectors.toList());
-        List<PropertyGroup> propertyGroups = propertyGroupBizService.getListAndRelatedByGroupNos(groupNos);
+        List<PropertyGroup> propertyGroups = propertyGroupBizService.getListAndRelatedByGroupIds(groupIds);
         page.setRecords(propertyGroups);
         return Result.success(page);
     }
@@ -75,16 +75,16 @@ public class PropertyGroupController {
 
         // 查询属性组信息
         LambdaQueryWrapper<PropertyGroup> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PropertyGroup::getPropertyGroupNo, req.getPropertyGroupNo());
+        queryWrapper.eq(PropertyGroup::getPropertyGroupId, req.getPropertyGroupId());
         PropertyGroup one = propertyGroupService.getOne(queryWrapper);
-        if (Objects.isNull(one) || StringUtils.isBlank(one.getPropertyGroupNo())) {
+        if (Objects.isNull(one) || StringUtils.isBlank(one.getPropertyGroupId())) {
             throw new BizException("属性库查询失败！");
         }
 
         // 查询属性组关联的属性列表
-        List<PropertyGroupStore> groupStores = propertyGroupStoreService.list(
-                new LambdaQueryWrapper<PropertyGroupStore>()
-                        .eq(PropertyGroupStore::getPropertyGroupNo, one.getPropertyGroupNo()));
+        List<PropertyGroupUnit> groupStores = propertyGroupStoreService.list(
+                new LambdaQueryWrapper<PropertyGroupUnit>()
+                        .eq(PropertyGroupUnit::getPropertyGroupId, one.getPropertyGroupId()));
         List<PropertyUnitKey> propertyUnitKeys = new ArrayList<>();
         if (!CollectionUtils.isEmpty(groupStores)) {
 
@@ -92,7 +92,7 @@ public class PropertyGroupController {
             propertyUnitKeys = propertyUnitKeyService.list(
                     new LambdaQueryWrapper<PropertyUnitKey>()
                             .in(PropertyUnitKey::getUnitKeyId,
-                                    groupStores.stream().map(PropertyGroupStore::getPropertyStoreNo)
+                                    groupStores.stream().map(PropertyGroupUnit::getUnitKeyId)
                                             .collect(Collectors.toList())));
             Set<String> nos = new HashSet<>();
             for (PropertyUnitKey storeKey : propertyUnitKeys) {
@@ -101,10 +101,10 @@ public class PropertyGroupController {
 
             if (!CollectionUtils.isEmpty(nos)) {
                 // 关联的属性value
-                List<propertyUnitValue> storeValues = propertyStoreValueService.list(
-                        new LambdaQueryWrapper<propertyUnitValue>().in(propertyUnitValue::getUnitKeyId, nos));
-                Map<String, List<propertyUnitValue>> listMap = storeValues.stream()
-                        .collect(Collectors.groupingBy(propertyUnitValue::getUnitKeyId));
+                List<PropertyUnitValue> storeValues = propertyStoreValueService.list(
+                        new LambdaQueryWrapper<PropertyUnitValue>().in(PropertyUnitValue::getUnitKeyId, nos));
+                Map<String, List<PropertyUnitValue>> listMap = storeValues.stream()
+                        .collect(Collectors.groupingBy(PropertyUnitValue::getUnitKeyId));
                 propertyUnitKeys.forEach(propertyStoreRespVo -> {
                     propertyStoreRespVo.setPropertyUnitValues(listMap.getOrDefault(propertyStoreRespVo.getUnitKeyId(), new ArrayList<>()));
                 });
@@ -112,7 +112,7 @@ public class PropertyGroupController {
         }
         PropertyGroupDetailRespVo res = new PropertyGroupDetailRespVo();
         res.setPropertyGroupName(one.getPropertyGroupName());
-        res.setPropertyStoreList(propertyUnitKeys);
+        res.setPropertyUnitKeys(propertyUnitKeys);
         return Result.success(res);
     }
 

@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zddgg.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyGroupUnit;
 import com.zddgg.mall.product.mapper.PropertyGroupStoreMapper;
 import com.zddgg.mall.product.service.PropertyGroupStoreService;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * @createDate 2022-12-04 08:17:07
  */
 @Service
-public class PropertyGroupStoreServiceImpl extends ServiceImpl<PropertyGroupStoreMapper, PropertyGroupStore>
+public class PropertyGroupStoreServiceImpl extends ServiceImpl<PropertyGroupStoreMapper, PropertyGroupUnit>
         implements PropertyGroupStoreService {
 
 }

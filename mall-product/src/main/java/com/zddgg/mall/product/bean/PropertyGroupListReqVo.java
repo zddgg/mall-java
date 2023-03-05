@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class PropertyGroupListReqVo extends PaginationReq {
 
-    private String propertyGroupNo;
+    private String propertyGroupId;
 
     private String propertyGroupName;
 

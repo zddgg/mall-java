@@ -5,7 +5,7 @@ import com.zddgg.mall.product.bean.PropertyGroupCreateVo;
 import com.zddgg.mall.product.bean.PropertyGroupDetailReqVo;
 import com.zddgg.mall.product.constant.StatusEnum;
 import com.zddgg.mall.product.entity.PropertyGroup;
-import com.zddgg.mall.product.entity.PropertyGroupStore;
+import com.zddgg.mall.product.entity.PropertyGroupUnit;
 import com.zddgg.mall.product.entity.PropertyUnitKey;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.PropertyGroupBizService;
@@ -46,16 +46,16 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
             throw new BizException("属性组名称[" + vo.getPropertyGroupName() + "]已存在！");
         }
         PropertyGroup propertyGroup = new PropertyGroup();
-        propertyGroup.setPropertyGroupNo(UUID.randomUUID().toString().replace("-", ""));
+        propertyGroup.setPropertyGroupId(UUID.randomUUID().toString().replace("-", ""));
         propertyGroup.setPropertyGroupName(vo.getPropertyGroupName());
         propertyGroup.setStatus(StatusEnum.DISABLED.code);
         propertyGroupService.save(propertyGroup);
 
-        ArrayList<PropertyGroupStore> saveList = new ArrayList<>();
-        for (PropertyUnitKey propertyUnitKey : vo.getPropertyStoreList()) {
-            PropertyGroupStore value = new PropertyGroupStore();
-            value.setPropertyGroupNo(propertyGroup.getPropertyGroupNo());
-            value.setPropertyStoreNo(propertyUnitKey.getUnitKeyId());
+        ArrayList<PropertyGroupUnit> saveList = new ArrayList<>();
+        for (PropertyUnitKey propertyUnitKey : vo.getPropertyUnitKeys()) {
+            PropertyGroupUnit value = new PropertyGroupUnit();
+            value.setPropertyGroupId(propertyGroup.getPropertyGroupId());
+            value.setUnitKeyId(propertyUnitKey.getUnitKeyId());
             value.setPropertyOrder(0);
             saveList.add(value);
         }
@@ -66,7 +66,7 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
     @Override
     public void edit(PropertyGroupCreateVo vo) {
         LambdaQueryWrapper<PropertyGroup> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(PropertyGroup::getPropertyGroupNo, vo.getPropertyGroupNo());
+        queryWrapper.eq(PropertyGroup::getPropertyGroupId, vo.getPropertyGroupId());
         PropertyGroup one = propertyGroupService.getOne(queryWrapper);
         if (Objects.isNull(one)) {
             throw new BizException("属性组不存在，请刷新列表！");
@@ -75,14 +75,14 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
         propertyGroupService.updateById(one);
 
         propertyGroupStoreService.remove(
-                new LambdaQueryWrapper<PropertyGroupStore>()
-                        .eq(PropertyGroupStore::getPropertyGroupNo, one.getPropertyGroupNo()));
+                new LambdaQueryWrapper<PropertyGroupUnit>()
+                        .eq(PropertyGroupUnit::getPropertyGroupId, one.getPropertyGroupId()));
 
-        ArrayList<PropertyGroupStore> saveList = new ArrayList<>();
-        for (PropertyUnitKey propertyUnitKey : vo.getPropertyStoreList()) {
-            PropertyGroupStore value = new PropertyGroupStore();
-            value.setPropertyGroupNo(one.getPropertyGroupNo());
-            value.setPropertyStoreNo(propertyUnitKey.getUnitKeyId());
+        ArrayList<PropertyGroupUnit> saveList = new ArrayList<>();
+        for (PropertyUnitKey propertyUnitKey : vo.getPropertyUnitKeys()) {
+            PropertyGroupUnit value = new PropertyGroupUnit();
+            value.setPropertyGroupId(one.getPropertyGroupId());
+            value.setUnitKeyId(propertyUnitKey.getUnitKeyId());
             value.setPropertyOrder(0);
             saveList.add(value);
         }
@@ -94,29 +94,29 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
     public void delete(PropertyGroupDetailReqVo reqVo) {
         propertyGroupService.remove(
                 new LambdaQueryWrapper<PropertyGroup>()
-                        .eq(PropertyGroup::getPropertyGroupNo, reqVo.getPropertyGroupNo()));
+                        .eq(PropertyGroup::getPropertyGroupId, reqVo.getPropertyGroupId()));
         propertyGroupStoreService.remove(
-                new LambdaQueryWrapper<PropertyGroupStore>()
-                        .eq(PropertyGroupStore::getPropertyGroupNo, reqVo.getPropertyGroupNo()));
+                new LambdaQueryWrapper<PropertyGroupUnit>()
+                        .eq(PropertyGroupUnit::getPropertyGroupId, reqVo.getPropertyGroupId()));
     }
 
     @Override
-    public List<PropertyGroup> getListAndRelatedByGroupNos(List<String> groupNos) {
-        if (CollectionUtils.isEmpty(groupNos)) {
+    public List<PropertyGroup> getListAndRelatedByGroupIds(List<String> groupIds) {
+        if (CollectionUtils.isEmpty(groupIds)) {
             return new ArrayList<>();
         }
         List<PropertyGroup> propertyGroups = propertyGroupService.list(
                 new LambdaQueryWrapper<PropertyGroup>()
-                        .in(PropertyGroup::getPropertyGroupNo, groupNos));
-        List<PropertyGroupStore> propertyGroupStores = propertyGroupStoreService.list(
-                new LambdaQueryWrapper<PropertyGroupStore>()
-                        .in(PropertyGroupStore::getPropertyGroupNo, groupNos));
-        if (!CollectionUtils.isEmpty(propertyGroupStores)) {
-            List<String> storeNos = propertyGroupStores.stream()
-                    .map(PropertyGroupStore::getPropertyStoreNo).collect(Collectors.toList());
-            Map<String, List<String>> group2StoreMap = propertyGroupStores.stream()
-                    .collect(Collectors.groupingBy(PropertyGroupStore::getPropertyGroupNo,
-                            Collectors.mapping(PropertyGroupStore::getPropertyStoreNo, Collectors.toList())));
+                        .in(PropertyGroup::getPropertyGroupId, groupIds));
+        List<PropertyGroupUnit> propertyGroupUnits = propertyGroupStoreService.list(
+                new LambdaQueryWrapper<PropertyGroupUnit>()
+                        .in(PropertyGroupUnit::getPropertyGroupId, groupIds));
+        if (!CollectionUtils.isEmpty(propertyGroupUnits)) {
+            List<String> storeNos = propertyGroupUnits.stream()
+                    .map(PropertyGroupUnit::getUnitKeyId).collect(Collectors.toList());
+            Map<String, List<String>> group2StoreMap = propertyGroupUnits.stream()
+                    .collect(Collectors.groupingBy(PropertyGroupUnit::getPropertyGroupId,
+                            Collectors.mapping(PropertyGroupUnit::getUnitKeyId, Collectors.toList())));
             List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyNos(storeNos);
             Map<String, PropertyUnitKey> storeMap = propertyUnitKeys
                     .stream()
@@ -124,9 +124,9 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
                             propertyStoreRespVo -> propertyStoreRespVo));
             propertyGroups.forEach(propertyGroup -> {
                 List<PropertyUnitKey> storeKeys = group2StoreMap
-                        .getOrDefault(propertyGroup.getPropertyGroupNo(), new ArrayList<>())
+                        .getOrDefault(propertyGroup.getPropertyGroupId(), new ArrayList<>())
                         .stream().map(storeMap::get).collect(Collectors.toList());
-                propertyGroup.setPropertyStoreList(storeKeys);
+                propertyGroup.setPropertyUnitKeys(storeKeys);
             });
 
         }
