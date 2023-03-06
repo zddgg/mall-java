@@ -1,14 +1,14 @@
 package com.zddgg.mall.product.bean;
 
 import com.zddgg.mall.product.entity.PropertyGroup;
+import com.zddgg.mall.product.entity.PropertySaleKey;
 import com.zddgg.mall.product.entity.PropertyUnitKey;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class BackendCategoryDetailRespVo {
-
+public class BackendCategoryDetail {
     private String categoryId;
 
     private String categoryName;
@@ -19,9 +19,9 @@ public class BackendCategoryDetailRespVo {
 
     private Boolean relatedProperty;
 
-    private List<PropertyGroup> propertyGroupList;
+    private List<PropertyGroup> propertyGroups;
 
-    private List<PropertyUnitKey> propertyStoreList;
+    private List<PropertyUnitKey> propertyUnitKeys;
 
-    private List<BackendCategoryDetailRespVo> parentCategoryDetail;
+    private List<PropertySaleKey> propertySaleKeys;
 }

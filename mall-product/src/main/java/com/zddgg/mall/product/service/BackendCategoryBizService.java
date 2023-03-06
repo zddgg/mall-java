@@ -3,7 +3,7 @@ package com.zddgg.mall.product.service;
 import com.zddgg.mall.common.response.PaginationRes;
 import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.bean.BackendCategoryCreateReqVo;
-import com.zddgg.mall.product.bean.BackendCategoryDetailRespVo;
+import com.zddgg.mall.product.bean.BackendCategoryDetail;
 import com.zddgg.mall.product.bean.BackendCategoryListVo;
 import com.zddgg.mall.product.bean.BackendCategoryNode;
 
@@ -25,9 +25,11 @@ public interface BackendCategoryBizService {
 
     void create(BackendCategoryCreateReqVo reqVo);
 
-    BackendCategoryDetailRespVo detail(String parentCategoryNo);
+    BackendCategoryDetail detail(String categoryId);
 
-    List<BackendCategoryDetailRespVo> allParentDetail(String parentCategoryNo);
+    List<BackendCategoryDetail> parentDetail(String categoryId);
+
+    List<BackendCategoryDetail> parentAndSelfDetail(String categoryId);
 
     void update(BackendCategoryCreateReqVo reqVo);
 

@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class PropertyGroupDetailRespVo {
 
-    private String propertyGroupNo;
+    private String propertyGroupId;
 
     private String propertyGroupName;
 

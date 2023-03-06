@@ -111,6 +111,7 @@ public class PropertyGroupController {
             }
         }
         PropertyGroupDetailRespVo res = new PropertyGroupDetailRespVo();
+        res.setPropertyGroupId(one.getPropertyGroupId());
         res.setPropertyGroupName(one.getPropertyGroupName());
         res.setPropertyUnitKeys(propertyUnitKeys);
         return Result.success(res);

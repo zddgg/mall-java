@@ -63,14 +63,19 @@ public class BackendCategoryController {
     }
 
     @PostMapping("detail")
-    public Result<BackendCategoryDetailRespVo> detail(@RequestBody BackendCategoryDetailReqVo reqVo) {
-        BackendCategoryDetailRespVo respVo = backendCategoryBizService.detail(reqVo.getCategoryId());
+    public Result<BackendCategoryDetail> detail(@RequestBody BackendCategoryDetailReqVo reqVo) {
+        return Result.success(backendCategoryBizService.detail(reqVo.getCategoryId()));
+    }
+
+    @PostMapping("parentDetail")
+    public Result<List<BackendCategoryDetail>> parentDetail(@RequestBody BackendCategoryDetailReqVo reqVo) {
+        List<BackendCategoryDetail> respVo = backendCategoryBizService.parentDetail(reqVo.getCategoryId());
         return Result.success(respVo);
     }
 
-    @PostMapping("allParentDetail")
-    public Result<List<BackendCategoryDetailRespVo>> allParentDetail(@RequestBody BackendCategoryDetailReqVo reqVo) {
-        List<BackendCategoryDetailRespVo> respVo = backendCategoryBizService.allParentDetail(reqVo.getCategoryName());
+    @PostMapping("parentAndSelfDetail")
+    public Result<List<BackendCategoryDetail>> parentAndSelfDetail(@RequestBody BackendCategoryDetailReqVo reqVo) {
+        List<BackendCategoryDetail> respVo = backendCategoryBizService.parentAndSelfDetail(reqVo.getCategoryId());
         return Result.success(respVo);
     }
 

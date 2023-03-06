@@ -6,36 +6,37 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
- * 属性组表
+ * 类目属性库关联表
  *
- * @TableName property_group
+ * @TableName category_property_sale
  */
-@TableName(value = "property_group")
+@TableName(value = "category_property_sale")
 @Getter
 @Setter
-public class PropertyGroup extends BaseEntity implements Serializable {
+public class CategoryPropertySale extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
     /**
-     * 属性编号
+     * 类目编号
      */
-    @TableField(value = "property_group_id")
-    private String propertyGroupId;
+    @TableField(value = "category_id")
+    private String categoryId;
     /**
-     * 属性名称
+     * 属性库编号
      */
-    @TableField(value = "property_group_name")
-    private String propertyGroupName;
+    @TableField(value = "property_sale_id")
+    private String propertySaleId;
+    /**
+     * 排序
+     */
+    @TableField(value = "order_no")
+    private Integer orderNo;
     /**
      * 状态: 0-停用, 1-启用, -1-删除
      */
     @TableField(value = "status")
     private String status;
-
-    @TableField(exist = false)
-    private List<PropertyUnitKey> propertyUnitKeys;
 }

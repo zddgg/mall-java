@@ -112,7 +112,7 @@ public class PropertyUnitBizServiceImpl implements PropertyUnitBizService {
     }
 
     @Override
-    public List<PropertyUnitKey> getListAndRelatedByPropertyNos(List<String> propertyKeyNos) {
+    public List<PropertyUnitKey> getListAndRelatedByPropertyIds(List<String> propertyKeyNos) {
         if (CollectionUtils.isEmpty(propertyKeyNos)) {
             return new ArrayList<>();
         }

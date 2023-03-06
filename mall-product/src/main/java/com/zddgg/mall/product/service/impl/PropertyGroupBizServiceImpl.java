@@ -117,7 +117,7 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
             Map<String, List<String>> group2StoreMap = propertyGroupUnits.stream()
                     .collect(Collectors.groupingBy(PropertyGroupUnit::getPropertyGroupId,
                             Collectors.mapping(PropertyGroupUnit::getUnitKeyId, Collectors.toList())));
-            List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyNos(storeNos);
+            List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyIds(storeNos);
             Map<String, PropertyUnitKey> storeMap = propertyUnitKeys
                     .stream()
                     .collect(Collectors.toMap(PropertyUnitKey::getUnitKeyId,

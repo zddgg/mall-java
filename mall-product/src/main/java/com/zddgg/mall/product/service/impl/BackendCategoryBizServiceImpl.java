@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zddgg.mall.common.response.PaginationRes;
 import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.bean.BackendCategoryCreateReqVo;
-import com.zddgg.mall.product.bean.BackendCategoryDetailRespVo;
+import com.zddgg.mall.product.bean.BackendCategoryDetail;
 import com.zddgg.mall.product.bean.BackendCategoryListVo;
 import com.zddgg.mall.product.bean.BackendCategoryNode;
 import com.zddgg.mall.product.constant.StatusEnum;
@@ -12,6 +12,7 @@ import com.zddgg.mall.product.entity.*;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.*;
 import com.zddgg.mall.product.utils.MemoryPagination;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,29 +22,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BackendCategoryBizServiceImpl implements BackendCategoryBizService {
 
     private final BackendCategoryService backendCategoryService;
 
     private final CategoryPropertyGroupService categoryPropertyGroupService;
 
-    private final CategoryPropertyStoreService categoryPropertyStoreService;
+    private final CategoryPropertyUnitService categoryPropertyUnitService;
+
+    private final CategoryPropertySaleService categoryPropertySaleService;
 
     private final PropertyGroupBizService propertyGroupBizService;
 
     private final PropertyUnitBizService propertyUnitBizService;
 
-    public BackendCategoryBizServiceImpl(BackendCategoryService backendCategoryService,
-                                         CategoryPropertyGroupService categoryPropertyGroupService,
-                                         CategoryPropertyStoreService categoryPropertyStoreService,
-                                         PropertyGroupBizService propertyGroupBizService,
-                                         PropertyUnitBizService propertyUnitBizService) {
-        this.backendCategoryService = backendCategoryService;
-        this.categoryPropertyGroupService = categoryPropertyGroupService;
-        this.categoryPropertyStoreService = categoryPropertyStoreService;
-        this.propertyGroupBizService = propertyGroupBizService;
-        this.propertyUnitBizService = propertyUnitBizService;
-    }
+    private final PropertySaleBizService propertySaleBizService;
 
     /**
      * 从跟类目开始生成类目树
@@ -122,12 +116,12 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         backendCategoryService.save(newBackendCategory);
 
         // 保存类目属性组信息
-        List<PropertyGroup> propertyGroupList = reqVo.getPropertyGroupList();
-        if (!CollectionUtils.isEmpty(propertyGroupList)) {
-            List<CategoryPropertyGroup> saveList = propertyGroupList.stream().map((propertyGroup) -> {
+        List<String> propertyGroupIdList = reqVo.getPropertyGroupIds();
+        if (!CollectionUtils.isEmpty(propertyGroupIdList)) {
+            List<CategoryPropertyGroup> saveList = propertyGroupIdList.stream().map((propertyGroupId) -> {
                 CategoryPropertyGroup categoryPropertyGroup = new CategoryPropertyGroup();
-                categoryPropertyGroup.setCategoryNo(newBackendCategory.getCategoryId());
-                categoryPropertyGroup.setPropertyGroupNo(propertyGroup.getPropertyGroupId());
+                categoryPropertyGroup.setCategoryId(newBackendCategory.getCategoryId());
+                categoryPropertyGroup.setPropertyGroupId(propertyGroupId);
                 categoryPropertyGroup.setOrderNo(0);
                 categoryPropertyGroup.setStatus(StatusEnum.DELETED.code);
                 return categoryPropertyGroup;
@@ -136,48 +130,67 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         }
 
         // 保存类目属性库信息
-        List<PropertyUnitKey> propertyUnitKeys = reqVo.getPropertyStoreList();
-        if (!CollectionUtils.isEmpty(propertyUnitKeys)) {
-            List<CategoryPropertyStore> saveList = propertyUnitKeys.stream().map((propertyStoreKey) -> {
-                CategoryPropertyStore categoryPropertyStore = new CategoryPropertyStore();
-                categoryPropertyStore.setCategoryNo(newBackendCategory.getCategoryId());
-                categoryPropertyStore.setPropertyStoreNo(propertyStoreKey.getUnitKeyId());
-                categoryPropertyStore.setOrderNo(0);
-                categoryPropertyStore.setStatus(StatusEnum.DISABLED.code);
-                return categoryPropertyStore;
+        List<String> propertyUnitIds = reqVo.getPropertyUnitIds();
+        if (!CollectionUtils.isEmpty(propertyUnitIds)) {
+            List<CategoryPropertyUnit> saveList = propertyUnitIds.stream().map((propertyUnitId) -> {
+                CategoryPropertyUnit categoryPropertyUnit = new CategoryPropertyUnit();
+                categoryPropertyUnit.setCategoryId(newBackendCategory.getCategoryId());
+                categoryPropertyUnit.setPropertyUnitId(propertyUnitId);
+                categoryPropertyUnit.setOrderNo(0);
+                categoryPropertyUnit.setStatus(StatusEnum.DISABLED.code);
+                return categoryPropertyUnit;
             }).collect(Collectors.toList());
-            categoryPropertyStoreService.saveBatch(saveList);
+            categoryPropertyUnitService.saveBatch(saveList);
+        }
+
+        // 保存销售属性信息
+        List<String> propertySaleIds = reqVo.getPropertySaleIds();
+        if (!CollectionUtils.isEmpty(propertySaleIds)) {
+            List<CategoryPropertySale> saveList = propertySaleIds.stream().map((propertySaleKeyId) -> {
+                CategoryPropertySale categoryPropertySale = new CategoryPropertySale();
+                categoryPropertySale.setCategoryId(newBackendCategory.getCategoryId());
+                categoryPropertySale.setPropertySaleId(propertySaleKeyId);
+                categoryPropertySale.setOrderNo(0);
+                categoryPropertySale.setStatus(StatusEnum.DISABLED.code);
+                return categoryPropertySale;
+            }).collect(Collectors.toList());
+            categoryPropertySaleService.saveBatch(saveList);
         }
     }
 
     @Override
-    public BackendCategoryDetailRespVo detail(String backendCategoryNo) {
+    public BackendCategoryDetail detail(String categoryId) {
         // 获取当前类目信息
-        BackendCategoryDetailRespVo respVo = categoryDetail(backendCategoryNo);
-        if (Objects.isNull(respVo)) {
+        BackendCategoryDetail detail = categoryDetail(categoryId);
+        if (Objects.isNull(detail)) {
             throw new BizException("类目信息不存在！");
         }
-
-        List<BackendCategoryNode> allParentNodes = getAllParentNodes(backendCategoryNo);
-        List<BackendCategoryDetailRespVo> parentCategoryInfo = allParentNodes.stream()
-                .map(backendCategoryNode ->
-                        categoryDetail(backendCategoryNode.getCategoryId()))
-                .sorted(Comparator.comparingInt(backendCategoryDetailRespVo -> backendCategoryDetailRespVo != null ? backendCategoryDetailRespVo.getLevel() : 0))
-                .collect(Collectors.toList());
-        respVo.setParentCategoryDetail(parentCategoryInfo);
-        return respVo;
+        return detail;
     }
 
     @Override
-    public List<BackendCategoryDetailRespVo> allParentDetail(String parentCategoryNo) {
-        if (StringUtils.isBlank(parentCategoryNo)) {
+    public List<BackendCategoryDetail> parentDetail(String categoryId) {
+        if (StringUtils.isBlank(categoryId) || StringUtils.equals(categoryId, "0")) {
             return new ArrayList<>();
         }
-        List<BackendCategoryNode> nodes = getAllParentNodesAndSelf(parentCategoryNo);
+        List<BackendCategoryNode> nodes = getAllParentNodes(categoryId);
         return nodes.stream()
                 .map(backendCategoryNode ->
                         categoryDetail(backendCategoryNode.getCategoryId()))
-                .sorted(Comparator.comparingInt(backendCategoryDetailRespVo -> backendCategoryDetailRespVo != null ? backendCategoryDetailRespVo.getLevel() : 0))
+                .sorted(Comparator.comparingInt(backendCategoryDetail -> backendCategoryDetail != null ? backendCategoryDetail.getLevel() : 0))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<BackendCategoryDetail> parentAndSelfDetail(String categoryId) {
+        if (StringUtils.isBlank(categoryId) || StringUtils.equals(categoryId, "0")) {
+            return new ArrayList<>();
+        }
+        List<BackendCategoryNode> nodes = getAllParentNodesAndSelf(categoryId);
+        return nodes.stream()
+                .map(backendCategoryNode ->
+                        categoryDetail(backendCategoryNode.getCategoryId()))
+                .sorted(Comparator.comparingInt(backendCategoryDetail -> backendCategoryDetail != null ? backendCategoryDetail.getLevel() : 0))
                 .collect(Collectors.toList());
     }
 
@@ -215,18 +228,21 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         // 删除关联属性信息
         categoryPropertyGroupService.remove(
                 new LambdaQueryWrapper<CategoryPropertyGroup>()
-                        .eq(CategoryPropertyGroup::getCategoryNo, current.getCategoryId()));
-        categoryPropertyStoreService.remove(
-                new LambdaQueryWrapper<CategoryPropertyStore>()
-                        .eq(CategoryPropertyStore::getCategoryNo, current.getCategoryId()));
+                        .eq(CategoryPropertyGroup::getCategoryId, current.getCategoryId()));
+        categoryPropertyUnitService.remove(
+                new LambdaQueryWrapper<CategoryPropertyUnit>()
+                        .eq(CategoryPropertyUnit::getCategoryId, current.getCategoryId()));
+        categoryPropertySaleService.remove(
+                new LambdaQueryWrapper<CategoryPropertySale>()
+                        .eq(CategoryPropertySale::getCategoryId, current.getCategoryId()));
 
         // 保存类目属性组信息
-        List<PropertyGroup> propertyGroupList = reqVo.getPropertyGroupList();
-        if (!CollectionUtils.isEmpty(propertyGroupList)) {
-            List<CategoryPropertyGroup> saveList = propertyGroupList.stream().map((propertyGroup) -> {
+        List<String> propertyGroupIds = reqVo.getPropertyGroupIds();
+        if (!CollectionUtils.isEmpty(propertyGroupIds)) {
+            List<CategoryPropertyGroup> saveList = propertyGroupIds.stream().map((propertyGroupId) -> {
                 CategoryPropertyGroup categoryPropertyGroup = new CategoryPropertyGroup();
-                categoryPropertyGroup.setCategoryNo(current.getCategoryId());
-                categoryPropertyGroup.setPropertyGroupNo(propertyGroup.getPropertyGroupId());
+                categoryPropertyGroup.setCategoryId(current.getCategoryId());
+                categoryPropertyGroup.setPropertyGroupId(propertyGroupId);
                 categoryPropertyGroup.setOrderNo(0);
                 categoryPropertyGroup.setStatus(StatusEnum.DELETED.code);
                 return categoryPropertyGroup;
@@ -235,17 +251,31 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         }
 
         // 保存类目属性库信息
-        List<PropertyUnitKey> propertyUnitKeys = reqVo.getPropertyStoreList();
+        List<String> propertyUnitKeys = reqVo.getPropertyUnitIds();
         if (!CollectionUtils.isEmpty(propertyUnitKeys)) {
-            List<CategoryPropertyStore> saveList = propertyUnitKeys.stream().map((propertyStoreKey) -> {
-                CategoryPropertyStore categoryPropertyStore = new CategoryPropertyStore();
-                categoryPropertyStore.setCategoryNo(current.getCategoryId());
-                categoryPropertyStore.setPropertyStoreNo(propertyStoreKey.getUnitKeyId());
-                categoryPropertyStore.setOrderNo(0);
-                categoryPropertyStore.setStatus(StatusEnum.DISABLED.code);
-                return categoryPropertyStore;
+            List<CategoryPropertyUnit> saveList = propertyUnitKeys.stream().map((propertyStoreId) -> {
+                CategoryPropertyUnit categoryPropertyUnit = new CategoryPropertyUnit();
+                categoryPropertyUnit.setCategoryId(current.getCategoryId());
+                categoryPropertyUnit.setPropertyUnitId(propertyStoreId);
+                categoryPropertyUnit.setOrderNo(0);
+                categoryPropertyUnit.setStatus(StatusEnum.DISABLED.code);
+                return categoryPropertyUnit;
             }).collect(Collectors.toList());
-            categoryPropertyStoreService.saveBatch(saveList);
+            categoryPropertyUnitService.saveBatch(saveList);
+        }
+
+        // 保存销售属性信息
+        List<String> propertySaleIds = reqVo.getPropertySaleIds();
+        if (!CollectionUtils.isEmpty(propertySaleIds)) {
+            List<CategoryPropertySale> saveList = propertySaleIds.stream().map((propertySaleKeyId) -> {
+                CategoryPropertySale categoryPropertySale = new CategoryPropertySale();
+                categoryPropertySale.setCategoryId(current.getCategoryId());
+                categoryPropertySale.setPropertySaleId(propertySaleKeyId);
+                categoryPropertySale.setOrderNo(0);
+                categoryPropertySale.setStatus(StatusEnum.DISABLED.code);
+                return categoryPropertySale;
+            }).collect(Collectors.toList());
+            categoryPropertySaleService.saveBatch(saveList);
         }
     }
 
@@ -257,14 +287,16 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         PaginationRes<BackendCategoryNode> page = MemoryPagination.page(list, vo.getCurrent(), vo.getPageSize());
         page.getRecords().forEach(backendCategoryNode -> {
             List<PropertyGroup> propertyGroupList = getPropertyGroupList(backendCategoryNode.getCategoryId());
-            List<PropertyUnitKey> propertyStoreList = getPropertyStoreList(backendCategoryNode.getCategoryId());
+            List<PropertyUnitKey> propertyStoreList = getPropertyUnitList(backendCategoryNode.getCategoryId());
+            List<PropertySaleKey> propertySaleList = getPropertySaleList(backendCategoryNode.getCategoryId());
             backendCategoryNode.setGroupCount(propertyGroupList.size());
             backendCategoryNode.setStoreCount(propertyStoreList.size());
+            backendCategoryNode.setSaleCount(propertySaleList.size());
         });
         return Result.success(page);
     }
 
-    private BackendCategoryDetailRespVo categoryDetail(String backendCategoryNo) {
+    private BackendCategoryDetail categoryDetail(String backendCategoryNo) {
         // 类目信息查询
         BackendCategory backendCategory = backendCategoryService.getOne(
                 new LambdaQueryWrapper<BackendCategory>()
@@ -278,52 +310,70 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         List<PropertyGroup> propertyGroupList = getPropertyGroupList(backendCategoryNo);
 
         // 属性库信息查询
-        List<PropertyUnitKey> propertyStoreList = getPropertyStoreList(backendCategoryNo);
+        List<PropertyUnitKey> propertyUnitKeys = getPropertyUnitList(backendCategoryNo);
 
-        BackendCategoryDetailRespVo respVo = new BackendCategoryDetailRespVo();
+        // 销售属性信息
+        List<PropertySaleKey> propertySaleKeys = getPropertySaleList(backendCategoryNo);
+
+        BackendCategoryDetail respVo = new BackendCategoryDetail();
         respVo.setCategoryId(backendCategory.getCategoryId());
         respVo.setCategoryName(backendCategory.getCategoryName());
         respVo.setParentId(backendCategory.getParentId());
         respVo.setLevel(backendCategory.getLevel());
-        respVo.setRelatedProperty(!CollectionUtils.isEmpty(propertyGroupList) || !CollectionUtils.isEmpty(propertyStoreList));
-        respVo.setPropertyGroupList(propertyGroupList);
-        respVo.setPropertyStoreList(propertyStoreList);
+        respVo.setRelatedProperty(!CollectionUtils.isEmpty(propertyGroupList) || !CollectionUtils.isEmpty(propertyUnitKeys));
+        respVo.setPropertyGroups(propertyGroupList);
+        respVo.setPropertyUnitKeys(propertyUnitKeys);
+        respVo.setPropertySaleKeys(propertySaleKeys);
         return respVo;
     }
 
-    private List<PropertyGroup> getPropertyGroupList(String backendCategoryNo) {
-        if (StringUtils.isBlank(backendCategoryNo)) {
+    private List<PropertyGroup> getPropertyGroupList(String backendCategoryId) {
+        if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }
         // 属性组信息查询
         List<String> groupNos = categoryPropertyGroupService.list(
                         new LambdaQueryWrapper<CategoryPropertyGroup>()
-                                .eq(CategoryPropertyGroup::getCategoryNo, backendCategoryNo))
+                                .eq(CategoryPropertyGroup::getCategoryId, backendCategoryId))
                 .stream()
-                .map(CategoryPropertyGroup::getPropertyGroupNo)
+                .map(CategoryPropertyGroup::getPropertyGroupId)
                 .collect(Collectors.toList());
         return propertyGroupBizService.getListAndRelatedByGroupIds(groupNos);
     }
 
-    private List<PropertyUnitKey> getPropertyStoreList(String backendCategoryNo) {
-        if (StringUtils.isBlank(backendCategoryNo)) {
+    private List<PropertyUnitKey> getPropertyUnitList(String backendCategoryId) {
+        if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }
         // 属性库信息查询
-        List<String> propertyNos = categoryPropertyStoreService.list(
-                        new LambdaQueryWrapper<CategoryPropertyStore>()
-                                .eq(CategoryPropertyStore::getCategoryNo, backendCategoryNo))
+        List<String> propertyIds = categoryPropertyUnitService.list(
+                        new LambdaQueryWrapper<CategoryPropertyUnit>()
+                                .eq(CategoryPropertyUnit::getCategoryId, backendCategoryId))
                 .stream()
-                .map(CategoryPropertyStore::getPropertyStoreNo)
+                .map(CategoryPropertyUnit::getPropertyUnitId)
                 .collect(Collectors.toList());
-        return propertyUnitBizService.getListAndRelatedByPropertyNos(propertyNos);
+        return propertyUnitBizService.getListAndRelatedByPropertyIds(propertyIds);
     }
 
-    private BackendCategory categoryParentCheck(String parentCategoryNo) {
-        if (StringUtils.isNotBlank(parentCategoryNo)) {
+    private List<PropertySaleKey> getPropertySaleList(String backendCategoryId) {
+        if (StringUtils.isBlank(backendCategoryId)) {
+            return new ArrayList<>();
+        }
+        // 属性库信息查询
+        List<String> propertyIds = categoryPropertySaleService.list(
+                        new LambdaQueryWrapper<CategoryPropertySale>()
+                                .eq(CategoryPropertySale::getCategoryId, backendCategoryId))
+                .stream()
+                .map(CategoryPropertySale::getPropertySaleId)
+                .collect(Collectors.toList());
+        return propertySaleBizService.getListAndRelatedByPropertyIds(propertyIds);
+    }
+
+    private BackendCategory categoryParentCheck(String parentCategoryId) {
+        if (StringUtils.isNotBlank(parentCategoryId)) {
             return backendCategoryService.getOne(
                     new LambdaQueryWrapper<BackendCategory>()
-                            .eq(BackendCategory::getCategoryId, parentCategoryNo));
+                            .eq(BackendCategory::getCategoryId, parentCategoryId));
         }
         return null;
     }
