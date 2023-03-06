@@ -2,7 +2,8 @@ package com.zddgg.mall.product.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
@@ -12,7 +13,8 @@ import java.io.Serializable;
  * @TableName category_property_group
  */
 @TableName(value = "category_property_group")
-@Data
+@Getter
+@Setter
 public class CategoryPropertyGroup extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
@@ -20,13 +22,13 @@ public class CategoryPropertyGroup extends BaseEntity implements Serializable {
     /**
      * 类目编号
      */
-    @TableField(value = "category_no")
-    private String categoryNo;
+    @TableField(value = "category_id")
+    private String categoryId;
     /**
      * 属性组编号
      */
-    @TableField(value = "property_group_no")
-    private String propertyGroupNo;
+    @TableField(value = "property_group_id")
+    private String propertyGroupId;
     /**
      * 排序
      */

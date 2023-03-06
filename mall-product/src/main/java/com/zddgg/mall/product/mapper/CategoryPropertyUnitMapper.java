@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.zddgg.mall.product.entity.CategoryPropertyStore;
+import com.zddgg.mall.product.entity.CategoryPropertyUnit;
 
 /**
  * @author 86239
@@ -9,7 +9,7 @@ import com.zddgg.mall.product.entity.CategoryPropertyStore;
  * @createDate 2022-12-05 22:37:49
  * @Entity com.voidtime.mall.product.entity.CategoryPropertyStore
  */
-public interface CategoryPropertyStoreMapper extends BaseMapper<CategoryPropertyStore> {
+public interface CategoryPropertyUnitMapper extends BaseMapper<CategoryPropertyUnit> {
 
 }
 

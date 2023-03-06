@@ -32,5 +32,7 @@ public class BackendCategoryNode {
 
     private Integer storeCount;
 
+    private Integer saleCount;
+
     private List<BackendCategoryNode> children;
 }

@@ -1,7 +1,5 @@
 package com.zddgg.mall.product.bean;
 
-import com.zddgg.mall.product.entity.PropertyGroup;
-import com.zddgg.mall.product.entity.PropertyUnitKey;
 import lombok.Data;
 
 import java.util.List;
@@ -15,9 +13,13 @@ public class BackendCategoryCreateReqVo {
 
     private String parentId;
 
+    private Integer level;
+
     private Boolean relatedProperty;
 
-    private List<PropertyGroup> propertyGroupList;
+    private List<String> propertyUnitIds;
 
-    private List<PropertyUnitKey> propertyStoreList;
+    private List<String> propertyGroupIds;
+
+    private List<String> propertySaleIds;
 }

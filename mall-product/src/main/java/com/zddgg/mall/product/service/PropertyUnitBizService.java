@@ -14,7 +14,7 @@ public interface PropertyUnitBizService {
 
     void delete(PropertyUnitDeleteReqVo reqVo);
 
-    List<PropertyUnitKey> getListAndRelatedByPropertyNos(List<String> propertyNos);
+    List<PropertyUnitKey> getListAndRelatedByPropertyIds(List<String> propertyNos);
 
     PropertyUnitKey getDetailAndRelatedByPropertyNo(String propertyNo);
 }

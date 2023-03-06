@@ -40,7 +40,7 @@ public class PropertyUnitController {
                 PropertyUnitKey::getUnitKeyName, req.getUnitKeyName());
         Page<PropertyUnitKey> page = new Page<>(req.getCurrent(), req.getPageSize());
         propertyUnitKeyService.page(page, queryWrapper);
-        List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyNos(
+        List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyIds(
                 page.getRecords().stream()
                         .map(PropertyUnitKey::getUnitKeyId).collect(Collectors.toList()));
         page.setRecords(propertyUnitKeys);

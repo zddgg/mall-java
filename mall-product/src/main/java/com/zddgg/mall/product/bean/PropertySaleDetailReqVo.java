@@ -2,7 +2,6 @@ package com.zddgg.mall.product.bean;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Data

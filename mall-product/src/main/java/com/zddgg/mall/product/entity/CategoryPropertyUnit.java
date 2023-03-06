@@ -2,31 +2,33 @@ package com.zddgg.mall.product.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 /**
  * 类目属性库关联表
  *
- * @TableName category_property_store
+ * @TableName category_property_unit
  */
-@TableName(value = "category_property_store")
-@Data
-public class CategoryPropertyStore extends BaseEntity implements Serializable {
+@TableName(value = "category_property_unit")
+@Getter
+@Setter
+public class CategoryPropertyUnit extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
     /**
      * 类目编号
      */
-    @TableField(value = "category_no")
-    private String categoryNo;
+    @TableField(value = "category_id")
+    private String categoryId;
     /**
      * 属性库编号
      */
-    @TableField(value = "property_store_no")
-    private String propertyStoreNo;
+    @TableField(value = "property_unit_id")
+    private String propertyUnitId;
     /**
      * 排序
      */
