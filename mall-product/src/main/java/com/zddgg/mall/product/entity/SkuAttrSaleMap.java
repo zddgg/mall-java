@@ -7,10 +7,15 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
-@TableName(value = "spu_meta")
+/**
+ * 后台类目表
+ *
+ * @TableName spu_attr_sale_map
+ */
+@TableName(value = "sku_attr_sale_map")
 @Getter
 @Setter
-public class SpuMeta extends BaseEntity implements Serializable {
+public class SkuAttrSaleMap extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -18,17 +23,17 @@ public class SpuMeta extends BaseEntity implements Serializable {
     @TableField(value = "spu_id")
     private String spuId;
 
-    @TableField(value = "spu_name")
-    private String spuName;
+    @TableField(value = "sku_id")
+    private String skuId;
 
-    @TableField(value = "store_id")
-    private String storeId;
+    @TableField(value = "attr_id")
+    private String attrId;
 
-    @TableField(value = "brand_id")
-    private String brandId;
+    @TableField(value = "attr_value_id")
+    private String attrValueId;
 
-    @TableField(value = "category_id")
-    private String categoryId;
+    @TableField(value = "attr_value_name")
+    private String attrValueName;
 
     @TableField(value = "status_flag")
     private String statusFlag;

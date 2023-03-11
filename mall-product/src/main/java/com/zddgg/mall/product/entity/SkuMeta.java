@@ -6,11 +6,12 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
-@TableName(value = "spu_meta")
+@TableName(value = "sku_meta")
 @Getter
 @Setter
-public class SpuMeta extends BaseEntity implements Serializable {
+public class SkuMeta extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -18,17 +19,14 @@ public class SpuMeta extends BaseEntity implements Serializable {
     @TableField(value = "spu_id")
     private String spuId;
 
-    @TableField(value = "spu_name")
-    private String spuName;
+    @TableField(value = "sku_id")
+    private String skuId;
 
-    @TableField(value = "store_id")
-    private String storeId;
+    @TableField(value = "sku_name")
+    private String skuName;
 
-    @TableField(value = "brand_id")
-    private String brandId;
-
-    @TableField(value = "category_id")
-    private String categoryId;
+    @TableField(value = "retail_price")
+    private BigDecimal retailPrice;
 
     @TableField(value = "status_flag")
     private String statusFlag;
