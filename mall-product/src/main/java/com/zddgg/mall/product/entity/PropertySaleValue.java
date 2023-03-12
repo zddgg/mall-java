@@ -22,13 +22,16 @@ public class PropertySaleValue extends BaseEntity implements Serializable {
     /**
      * 属性key编号
      */
-    @TableField(value = "sale_key_id")
-    private String saleKeyId;
+    @TableField(value = "key_id")
+    private String keyId;
+
+    @TableField(value = "value_id")
+    private String valueId;
     /**
      * 属性value
      */
-    @TableField(value = "property_value")
-    private String propertyValue;
+    @TableField(value = "value_name")
+    private String valueName;
     /**
      * 属性value顺序
      */

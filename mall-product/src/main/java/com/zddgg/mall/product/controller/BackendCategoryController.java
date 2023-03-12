@@ -1,11 +1,17 @@
 package com.zddgg.mall.product.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zddgg.mall.common.response.PaginationRes;
 import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.bean.*;
+import com.zddgg.mall.product.constant.StatusEnum;
 import com.zddgg.mall.product.entity.BackendCategory;
-import com.zddgg.mall.product.service.BackendCategoryBizService;
-import com.zddgg.mall.product.service.BackendCategoryService;
+import com.zddgg.mall.product.entity.CategoryPropertySale;
+import com.zddgg.mall.product.entity.PropertySaleKey;
+import com.zddgg.mall.product.exception.BizException;
+import com.zddgg.mall.product.service.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,17 +24,18 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("backendCategory")
+@RequiredArgsConstructor
 public class BackendCategoryController {
 
     private final BackendCategoryService backendCategoryService;
 
     private final BackendCategoryBizService backendCategoryBizService;
 
-    public BackendCategoryController(BackendCategoryService backendCategoryService,
-                                     BackendCategoryBizService backendCategoryBizService) {
-        this.backendCategoryService = backendCategoryService;
-        this.backendCategoryBizService = backendCategoryBizService;
-    }
+    private final PropertySaleKeyService propertySaleKeyService;
+
+    private final CategoryPropertySaleService categoryPropertySaleService;
+
+    private final PropertySaleBizService propertySaleBizService;
 
     @PostMapping("list")
     public Result<PaginationRes<BackendCategoryNode>> list(@RequestBody BackendCategoryListVo vo) {
@@ -91,5 +98,64 @@ public class BackendCategoryController {
             return option;
         }).collect(Collectors.toList());
         return Result.success(options);
+    }
+
+    @PostMapping("queryAttrSaleList")
+    public Result<Object> queryAttrSaleList(@RequestBody BackendCategoryAttrReqVo reqVo) {
+        BackendCategory backendCategory = backendCategoryService.getOne(
+                new LambdaQueryWrapper<BackendCategory>()
+                        .eq(BackendCategory::getCategoryId, reqVo.getCategoryId()));
+        if (Objects.isNull(backendCategory)) {
+            throw new BizException("后台类目信息不存在！");
+        }
+        List<CategoryPropertySale> propertySaleList = categoryPropertySaleService.list(
+                new LambdaQueryWrapper<CategoryPropertySale>()
+                        .eq(CategoryPropertySale::getCategoryId, reqVo.getCategoryId()));
+        List<PropertySaleKey> propertySaleKeys = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(propertySaleList)) {
+            List<String> attrIds = propertySaleList.stream().map(CategoryPropertySale::getPropertySaleId)
+                    .collect(Collectors.toList());
+            propertySaleKeys = propertySaleBizService.getListAndRelatedByPropertyIds(attrIds);
+        }
+        return Result.success(propertySaleKeys);
+    }
+
+    @PostMapping("addAttrSale")
+    public Result<Object> addAttrSale(@RequestBody BackendCategoryAttrReqVo reqVo) {
+        BackendCategory backendCategory = backendCategoryService.getOne(
+                new LambdaQueryWrapper<BackendCategory>()
+                        .eq(BackendCategory::getCategoryId, reqVo.getCategoryId()));
+        if (Objects.isNull(backendCategory)) {
+            throw new BizException("后台类目信息不存在！");
+        }
+        PropertySaleKey propertySaleKey = propertySaleKeyService.getOne(
+                new LambdaQueryWrapper<PropertySaleKey>()
+                        .eq(PropertySaleKey::getKeyId, reqVo.getAttrId()));
+        if (Objects.isNull(propertySaleKey)) {
+            throw new BizException("销售属性信息不存在！");
+        }
+        CategoryPropertySale categoryPropertySale = categoryPropertySaleService.getOne(
+                new LambdaQueryWrapper<CategoryPropertySale>()
+                        .eq(CategoryPropertySale::getCategoryId, reqVo.getCategoryId())
+                        .eq(CategoryPropertySale::getPropertySaleId, reqVo.getAttrId()));
+        if (Objects.nonNull(categoryPropertySale)) {
+            throw new BizException("销售属性已绑定！");
+        }
+        CategoryPropertySale save = new CategoryPropertySale();
+        save.setCategoryId(reqVo.getCategoryId());
+        save.setPropertySaleId(reqVo.getAttrId());
+        save.setOrderNo(0);
+        save.setStatus(StatusEnum.ENABLED.code);
+        categoryPropertySaleService.save(save);
+        return Result.success();
+    }
+
+    @PostMapping("deleteAttrSale")
+    public Result<Object> deleteAttrSale(@RequestBody BackendCategoryAttrReqVo reqVo) {
+        categoryPropertySaleService.remove(
+                new LambdaQueryWrapper<CategoryPropertySale>()
+                        .eq(CategoryPropertySale::getCategoryId, reqVo.getCategoryId())
+                        .eq(CategoryPropertySale::getPropertySaleId, reqVo.getAttrId()));
+        return Result.success();
     }
 }

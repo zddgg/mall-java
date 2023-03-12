@@ -4,14 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.common.request.PaginationReq;
 import com.zddgg.mall.common.response.Result;
+import com.zddgg.mall.product.bean.SpuAttrReqVo;
+import com.zddgg.mall.product.bean.SpuCreateReqVo;
 import com.zddgg.mall.product.bean.SpuDetailReqVo;
-import com.zddgg.mall.product.bean.SpuDetailRespVo;
-import com.zddgg.mall.product.bean.SpuDetailUpdateReqVo;
 import com.zddgg.mall.product.constant.StatusEnum;
-import com.zddgg.mall.product.entity.SkuAttrSaleMap;
-import com.zddgg.mall.product.entity.SkuMeta;
-import com.zddgg.mall.product.entity.SpuAttrSaleMap;
-import com.zddgg.mall.product.entity.SpuMeta;
+import com.zddgg.mall.product.entity.*;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.*;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -41,6 +39,10 @@ public class SpuController {
 
     private final SkuAttrSaleMapService skuAttrSaleMapService;
 
+    private final PropertySaleKeyService propertySaleKeyService;
+
+    private final PropertySaleValueService propertySaleValueService;
+
     @PostMapping("list")
     public Result<Page<SpuMeta>> list(@RequestBody PaginationReq req) {
         Page<SpuMeta> page = new Page<>(req.getCurrent(), req.getPageSize());
@@ -51,96 +53,40 @@ public class SpuController {
     }
 
     @PostMapping("detail")
-    public Result<SpuDetailRespVo> detail(@RequestBody SpuDetailReqVo req) {
+    public Result<SpuMeta> detail(@RequestBody SpuDetailReqVo req) {
         SpuMeta spuMeta = spuMetaService.getOne(
                 new LambdaQueryWrapper<SpuMeta>()
                         .eq(SpuMeta::getSpuId, req.getSpuId()));
-        if (Objects.isNull(spuMeta)) {
-            throw new BizException("spu信息查询失败！");
-        }
-        List<SpuAttrSaleMap> spuAttrSaleMaps = spuAttrSaleMapService.list(
-                new LambdaQueryWrapper<SpuAttrSaleMap>()
-                        .eq(SpuAttrSaleMap::getSpuId, req.getSpuId()));
-        SpuDetailRespVo respVo = new SpuDetailRespVo();
-        respVo.setSpuMeta(spuMeta);
-        respVo.setSpuAttrSaleMaps(spuAttrSaleMaps);
-        return Result.success(respVo);
+        return Result.success(spuMeta);
     }
 
     @PostMapping("create")
-    public Result<Object> create(@RequestBody SpuDetailUpdateReqVo req) {
-        SpuMeta spuMeta = req.getSpuMeta();
-        String spuId = idService.getId();
-        spuMeta.setSpuId(spuId);
+    public Result<Object> create(@RequestBody SpuCreateReqVo req) {
+        SpuMeta spuMeta = new SpuMeta();
+        spuMeta.setSpuId(idService.getId());
+        spuMeta.setSpuName(req.getSpuName());
+        spuMeta.setStoreId(req.getStoreId());
+        spuMeta.setBrandId(req.getBrandId());
+        spuMeta.setCategoryId(req.getCategoryId());
         spuMeta.setStatusFlag(StatusEnum.ENABLED.code);
         spuMetaService.save(spuMeta);
-
-        List<String> addAttrNames = req.getAddAttrNames();
-        if (!CollectionUtils.isEmpty(addAttrNames)) {
-            List<SpuAttrSaleMap> saveList = addAttrNames
-                    .stream().map(String::trim).collect(Collectors.toSet())
-                    .stream().map(name -> {
-                        SpuAttrSaleMap attrSaleMap = new SpuAttrSaleMap();
-                        attrSaleMap.setSpuId(spuId);
-                        attrSaleMap.setAttrId(idService.getId());
-                        attrSaleMap.setAttrName(name);
-                        attrSaleMap.setStatusFlag(StatusEnum.ENABLED.code);
-                        return attrSaleMap;
-                    }).collect(Collectors.toList());
-            spuAttrSaleMapService.saveBatch(saveList);
-        }
         return Result.success();
     }
 
     @PostMapping("update")
-    public Result<Object> update(@RequestBody SpuDetailUpdateReqVo req) {
-        SpuMeta spuMeta = req.getSpuMeta();
+    public Result<Object> update(@RequestBody SpuCreateReqVo req) {
         SpuMeta one = spuMetaService.getOne(
                 new LambdaQueryWrapper<SpuMeta>()
-                        .eq(SpuMeta::getSpuId, spuMeta.getSpuId()));
+                        .eq(SpuMeta::getSpuId, req.getSpuId()));
         if (Objects.isNull(one)) {
             throw new BizException("SPU信息不存在！");
         }
         // todo 删除
-        one.setStoreId(spuMeta.getStoreId());
-        one.setSpuName(spuMeta.getSpuName());
-        one.setBrandId(spuMeta.getBrandId());
-        one.setCategoryId(spuMeta.getCategoryId());
+        one.setSpuName(req.getSpuName());
+        one.setStoreId(req.getStoreId());
+        one.setBrandId(req.getBrandId());
+        one.setCategoryId(req.getCategoryId());
         spuMetaService.updateById(one);
-        List<String> addAttrNames = req.getAddAttrNames();
-        if (!CollectionUtils.isEmpty(addAttrNames)) {
-            SpuAttrSaleMap exist = spuAttrSaleMapService.getOne(
-                    new LambdaQueryWrapper<SpuAttrSaleMap>()
-                            .in(SpuAttrSaleMap::getAttrName, addAttrNames));
-            if (Objects.nonNull(exist)) {
-                throw new BizException("属性名" + exist.getAttrName() + "已存在！");
-            }
-
-            List<SpuAttrSaleMap> saveList = new ArrayList<>();
-            addAttrNames.forEach(name -> {
-                SpuAttrSaleMap attrSaleMap = new SpuAttrSaleMap();
-                attrSaleMap.setSpuId(one.getSpuId());
-                attrSaleMap.setAttrId(idService.getId());
-                attrSaleMap.setAttrName(name);
-                attrSaleMap.setStatusFlag(StatusEnum.ENABLED.code);
-                saveList.add(attrSaleMap);
-            });
-            spuAttrSaleMapService.saveBatch(saveList);
-        }
-        List<String> deleteAttrIds = req.getDeleteAttrIds();
-        if (!CollectionUtils.isEmpty(deleteAttrIds)) {
-            SkuAttrSaleMap exist = skuAttrSaleMapService.getOne(
-                    new LambdaQueryWrapper<SkuAttrSaleMap>()
-                            .eq(SkuAttrSaleMap::getSpuId, one.getSpuId())
-                            .in(SkuAttrSaleMap::getAttrId, deleteAttrIds));
-            if (Objects.nonNull(exist)) {
-                throw new BizException("已有SKU使用该属性，无法删除");
-            }
-            spuAttrSaleMapService.remove(
-                    new LambdaQueryWrapper<SpuAttrSaleMap>()
-                            .eq(SpuAttrSaleMap::getSpuId, one.getSpuId())
-                            .in(SpuAttrSaleMap::getAttrId, deleteAttrIds));
-        }
         return Result.success();
     }
 
@@ -155,9 +101,72 @@ public class SpuController {
         spuMetaService.remove(
                 new LambdaQueryWrapper<SpuMeta>()
                         .eq(SpuMeta::getSpuId, req.getSpuId()));
-        spuAttrSaleMapService.remove(
+        return Result.success();
+    }
+
+    @PostMapping("queryAttrList")
+    public Result<List<PropertySaleKey>> queryAttrList(@RequestBody SpuAttrReqVo req) {
+        List<SpuAttrSaleMap> saleMaps = spuAttrSaleMapService.list(
                 new LambdaQueryWrapper<SpuAttrSaleMap>()
                         .eq(SpuAttrSaleMap::getSpuId, req.getSpuId()));
+        List<PropertySaleKey> saleKeys = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(saleMaps)) {
+            List<String> attrIds = saleMaps.stream().map(SpuAttrSaleMap::getAttrId).collect(Collectors.toList());
+            saleKeys = propertySaleKeyService.list(
+                    new LambdaQueryWrapper<PropertySaleKey>()
+                            .in(PropertySaleKey::getKeyId, attrIds));
+            Map<String, List<PropertySaleValue>> saleValueMap = propertySaleValueService.list(
+                            new LambdaQueryWrapper<PropertySaleValue>()
+                                    .in(PropertySaleValue::getKeyId, attrIds))
+                    .stream().collect(Collectors.groupingBy(PropertySaleValue::getKeyId));
+            saleKeys.forEach((item) -> item.setPropertySaleValues(saleValueMap.get(item.getKeyId())));
+        }
+        return Result.success(saleKeys);
+    }
+
+    @PostMapping("addAttrSale")
+    public Result<Object> addAttrSale(@RequestBody SpuAttrReqVo req) {
+        SpuMeta spuMeta = spuMetaService.getOne(
+                new LambdaQueryWrapper<SpuMeta>()
+                        .eq(SpuMeta::getSpuId, req.getSpuId()));
+        if (Objects.isNull(spuMeta)) {
+            throw new BizException("SPU信息不存在！");
+        }
+        PropertySaleKey propertySaleKey = propertySaleKeyService.getOne(
+                new LambdaQueryWrapper<PropertySaleKey>()
+                        .eq(PropertySaleKey::getKeyId, req.getAttrId()));
+        if (Objects.isNull(propertySaleKey)) {
+            throw new BizException("销售属性信息不存在！");
+        }
+        SpuAttrSaleMap attrSaleMap = spuAttrSaleMapService.getOne(
+                new LambdaQueryWrapper<SpuAttrSaleMap>()
+                        .eq(SpuAttrSaleMap::getSpuId, req.getSpuId())
+                        .eq(SpuAttrSaleMap::getAttrId, req.getAttrId()));
+        if (Objects.nonNull(attrSaleMap)) {
+            throw new BizException("销售属性已绑定！");
+        }
+        SpuAttrSaleMap save = new SpuAttrSaleMap();
+        save.setSpuId(req.getSpuId());
+        save.setAttrId(req.getAttrId());
+        save.setAttrName(propertySaleKey.getKeyName());
+        save.setStatusFlag(StatusEnum.ENABLED.code);
+        spuAttrSaleMapService.save(save);
+        return Result.success();
+    }
+
+    @PostMapping("deleteAttrSale")
+    public Result<Object> deleteAttrSale(@RequestBody SpuAttrReqVo req) {
+        SkuAttrSaleMap skuAttrSaleMap = skuAttrSaleMapService.getOne(
+                new LambdaQueryWrapper<SkuAttrSaleMap>()
+                        .eq(SkuAttrSaleMap::getSpuId, req.getSpuId())
+                        .eq(SkuAttrSaleMap::getAttrId, req.getAttrId()));
+        if (Objects.nonNull(skuAttrSaleMap)) {
+            throw new BizException("已有SKU绑定该属性，无法删除！");
+        }
+        spuAttrSaleMapService.remove(
+                new LambdaQueryWrapper<SpuAttrSaleMap>()
+                        .eq(SpuAttrSaleMap::getSpuId, req.getSpuId())
+                        .eq(SpuAttrSaleMap::getAttrId, req.getAttrId()));
         return Result.success();
     }
 }

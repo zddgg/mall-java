@@ -33,9 +33,9 @@ public class PropertySaleBizServiceImpl implements PropertySaleBizService {
                         .in(PropertySaleKey::getKeyId, propertyIds));
         List<PropertySaleValue> propertySaleValues = propertySaleValueService.list(
                 new LambdaQueryWrapper<PropertySaleValue>()
-                        .in(PropertySaleValue::getSaleKeyId, propertyIds));
+                        .in(PropertySaleValue::getKeyId, propertyIds));
         Map<String, List<PropertySaleValue>> propertyKeyNoMap = propertySaleValues.stream()
-                .collect(Collectors.groupingBy(PropertySaleValue::getSaleKeyId));
+                .collect(Collectors.groupingBy(PropertySaleValue::getKeyId));
         propertySaleKeys.forEach(propertyStoreKey ->
                 propertyStoreKey.setPropertySaleValues(propertyKeyNoMap.get(propertyStoreKey.getKeyId())));
         return propertySaleKeys;
