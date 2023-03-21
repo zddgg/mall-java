@@ -3,6 +3,8 @@ package com.zddgg.mall.product.service;
 import com.zddgg.mall.product.entity.SkuMeta;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
 * @author 86239
 * @description 针对表【sku_meta(SKU信息表)】的数据库操作Service
@@ -10,4 +12,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface SkuMetaService extends IService<SkuMeta> {
 
+    public List<SkuMeta> getListBySpuId(String spuId);
 }
