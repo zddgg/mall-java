@@ -20,7 +20,7 @@ public class SpuSkuCreateReqVo {
     public static class SkuItem {
         private String skuName;
         private String retailPrice;
-        private String attrList;
+        private List<AttrFlatMapItem> attrList;
     }
 
     @Data

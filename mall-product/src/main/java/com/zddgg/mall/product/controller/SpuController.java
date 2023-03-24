@@ -1,6 +1,5 @@
 package com.zddgg.mall.product.controller;
 
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.common.request.PaginationReq;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +174,54 @@ public class SpuController {
 
     @PostMapping("spuSkuCreate")
     public Result<Object> deleteAttrSale(@RequestBody SpuSkuCreateReqVo req) {
-        System.out.println(JSON.toJSONString(req));
+        SpuMeta spuMeta = new SpuMeta();
+        String spuId = idService.getId();
+        spuMeta.setSpuId(spuId);
+        spuMeta.setSpuName(req.getSpuName());
+        spuMeta.setStoreId(req.getStoreId());
+        spuMeta.setBrandId(req.getBrandId());
+        spuMeta.setCategoryId(req.getCategoryId());
+        spuMeta.setStatusFlag(StatusEnum.ENABLED.code);
+        spuMetaService.save(spuMeta);
+
+        List<SpuAttrSaleMap> spuAttrSaleMaps = req.getSpuAttrSaleDataList().stream()
+                .map((item) -> {
+                    SpuAttrSaleMap spuAttrSaleMap = new SpuAttrSaleMap();
+                    spuAttrSaleMap.setSpuId(spuId);
+                    spuAttrSaleMap.setAttrId(item.getKeyId());
+                    spuAttrSaleMap.setAttrName(item.getKeyName());
+                    spuAttrSaleMap.setStatusFlag(StatusEnum.ENABLED.code);
+                    return spuAttrSaleMap;
+                })
+                .collect(Collectors.toList());
+        spuAttrSaleMapService.saveBatch(spuAttrSaleMaps);
+
+        List<SkuMeta> skuSaveList = new ArrayList<>();
+        List<SkuAttrSaleMap> skuAttrSaleMapSaveList = new ArrayList<>();
+        for (SpuSkuCreateReqVo.SkuItem skuItem : req.getSkuList()) {
+            String skuId = idService.getId();
+            SkuMeta skuMeta = new SkuMeta();
+            skuMeta.setSpuId(spuId);
+            skuMeta.setSkuId(skuId);
+            skuMeta.setSkuName(skuItem.getSkuName());
+            skuMeta.setRetailPrice(new BigDecimal(skuItem.getRetailPrice()));
+            skuMeta.setStatusFlag(StatusEnum.ENABLED.code);
+            List<SkuAttrSaleMap> skuAttrSaleMaps = skuItem.getAttrList().stream()
+                    .map((item) -> {
+                        SkuAttrSaleMap skuAttrSaleMap = new SkuAttrSaleMap();
+                        skuAttrSaleMap.setSpuId(spuId);
+                        skuAttrSaleMap.setSkuId(skuId);
+                        skuAttrSaleMap.setAttrId(item.getAttrId());
+                        skuAttrSaleMap.setAttrValueId(item.getAttrValueId());
+                        skuAttrSaleMap.setAttrValueName(item.getAttrValueName());
+                        skuAttrSaleMap.setStatusFlag(StatusEnum.ENABLED.code);
+                        return skuAttrSaleMap;
+                    }).collect(Collectors.toList());
+            skuSaveList.add(skuMeta);
+            skuAttrSaleMapSaveList.addAll(skuAttrSaleMaps);
+        }
+        skuMetaService.saveBatch(skuSaveList);
+        skuAttrSaleMapService.saveBatch(skuAttrSaleMapSaveList);
         return Result.success();
     }
 }
