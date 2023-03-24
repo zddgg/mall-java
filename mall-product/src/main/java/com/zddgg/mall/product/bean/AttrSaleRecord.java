@@ -7,19 +7,19 @@ import java.util.List;
 @Data
 public class AttrSaleRecord {
 
-    private String attrId;
+    private String keyId;
 
-    private String attrName;
+    private String keyName;
 
-    private List<AttrValue> attrValues;
+    private List<AttrValue> propertySaleValues;
 
     @Data
     public static class AttrValue {
 
-        private String attrId;
+        private String keyId;
 
-        private String attrValueId;
+        private String valueId;
 
-        private String attrValueName;
+        private String valueName;
     }
 }
