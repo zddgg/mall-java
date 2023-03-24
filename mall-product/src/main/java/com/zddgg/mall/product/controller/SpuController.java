@@ -1,5 +1,6 @@
 package com.zddgg.mall.product.controller;
 
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.common.request.PaginationReq;
@@ -7,6 +8,7 @@ import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.bean.SpuAttrReqVo;
 import com.zddgg.mall.product.bean.SpuCreateReqVo;
 import com.zddgg.mall.product.bean.SpuDetailReqVo;
+import com.zddgg.mall.product.bean.SpuSkuCreateReqVo;
 import com.zddgg.mall.product.constant.StatusEnum;
 import com.zddgg.mall.product.entity.*;
 import com.zddgg.mall.product.exception.BizException;
@@ -167,6 +169,12 @@ public class SpuController {
                 new LambdaQueryWrapper<SpuAttrSaleMap>()
                         .eq(SpuAttrSaleMap::getSpuId, req.getSpuId())
                         .eq(SpuAttrSaleMap::getAttrId, req.getAttrId()));
+        return Result.success();
+    }
+
+    @PostMapping("spuSkuCreate")
+    public Result<Object> deleteAttrSale(@RequestBody SpuSkuCreateReqVo req) {
+        System.out.println(JSON.toJSONString(req));
         return Result.success();
     }
 }
