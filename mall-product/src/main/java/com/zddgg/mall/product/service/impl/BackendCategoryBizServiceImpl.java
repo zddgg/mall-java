@@ -286,10 +286,10 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         list = list.stream().sorted(Comparator.comparing(BackendCategoryNode::getId)).collect(Collectors.toList());
         PaginationRes<BackendCategoryNode> page = MemoryPagination.page(list, vo.getCurrent(), vo.getPageSize());
         page.getRecords().forEach(backendCategoryNode -> {
-            List<PropertyGroup> propertyGroupList = getPropertyGroupList(backendCategoryNode.getCategoryId());
-            List<PropertyUnitKey> propertyStoreList = getPropertyUnitList(backendCategoryNode.getCategoryId());
+            List<AttrGroup> attrGroupList = getPropertyGroupList(backendCategoryNode.getCategoryId());
+            List<AttrUnitKey> propertyStoreList = getPropertyUnitList(backendCategoryNode.getCategoryId());
             List<PropertySaleKey> propertySaleList = getPropertySaleList(backendCategoryNode.getCategoryId());
-            backendCategoryNode.setGroupCount(propertyGroupList.size());
+            backendCategoryNode.setGroupCount(attrGroupList.size());
             backendCategoryNode.setStoreCount(propertyStoreList.size());
             backendCategoryNode.setSaleCount(propertySaleList.size());
         });
@@ -307,10 +307,10 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         }
 
         // 属性组信息查询
-        List<PropertyGroup> propertyGroupList = getPropertyGroupList(backendCategoryNo);
+        List<AttrGroup> attrGroupList = getPropertyGroupList(backendCategoryNo);
 
         // 属性库信息查询
-        List<PropertyUnitKey> propertyUnitKeys = getPropertyUnitList(backendCategoryNo);
+        List<AttrUnitKey> AttrUnitKeys = getPropertyUnitList(backendCategoryNo);
 
         // 销售属性信息
         List<PropertySaleKey> propertySaleKeys = getPropertySaleList(backendCategoryNo);
@@ -320,14 +320,14 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         respVo.setCategoryName(backendCategory.getCategoryName());
         respVo.setParentId(backendCategory.getParentId());
         respVo.setLevel(backendCategory.getLevel());
-        respVo.setRelatedProperty(!CollectionUtils.isEmpty(propertyGroupList) || !CollectionUtils.isEmpty(propertyUnitKeys));
-        respVo.setPropertyGroups(propertyGroupList);
-        respVo.setPropertyUnitKeys(propertyUnitKeys);
+        respVo.setRelatedProperty(!CollectionUtils.isEmpty(attrGroupList) || !CollectionUtils.isEmpty(AttrUnitKeys));
+        respVo.setAttrGroups(attrGroupList);
+        respVo.setAttrUnitKeys(AttrUnitKeys);
         respVo.setPropertySaleKeys(propertySaleKeys);
         return respVo;
     }
 
-    private List<PropertyGroup> getPropertyGroupList(String backendCategoryId) {
+    private List<AttrGroup> getPropertyGroupList(String backendCategoryId) {
         if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }
@@ -341,7 +341,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         return propertyGroupBizService.getListAndRelatedByGroupIds(groupNos);
     }
 
-    private List<PropertyUnitKey> getPropertyUnitList(String backendCategoryId) {
+    private List<AttrUnitKey> getPropertyUnitList(String backendCategoryId) {
         if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }

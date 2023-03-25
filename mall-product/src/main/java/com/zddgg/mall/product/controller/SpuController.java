@@ -108,12 +108,12 @@ public class SpuController {
 
     @PostMapping("queryAttrList")
     public Result<List<PropertySaleKey>> queryAttrList(@RequestBody SpuAttrReqVo req) {
-        List<SpuAttrSaleMap> saleMaps = spuAttrSaleMapService.list(
-                new LambdaQueryWrapper<SpuAttrSaleMap>()
-                        .eq(SpuAttrSaleMap::getSpuId, req.getSpuId()));
+        List<SpuAttrSale> saleMaps = spuAttrSaleMapService.list(
+                new LambdaQueryWrapper<SpuAttrSale>()
+                        .eq(SpuAttrSale::getSpuId, req.getSpuId()));
         List<PropertySaleKey> saleKeys = new ArrayList<>();
         if (!CollectionUtils.isEmpty(saleMaps)) {
-            List<String> attrIds = saleMaps.stream().map(SpuAttrSaleMap::getAttrId).collect(Collectors.toList());
+            List<String> attrIds = saleMaps.stream().map(SpuAttrSale::getAttrId).collect(Collectors.toList());
             saleKeys = propertySaleKeyService.list(
                     new LambdaQueryWrapper<PropertySaleKey>()
                             .in(PropertySaleKey::getKeyId, attrIds));
@@ -140,14 +140,14 @@ public class SpuController {
         if (Objects.isNull(propertySaleKey)) {
             throw new BizException("销售属性信息不存在！");
         }
-        SpuAttrSaleMap attrSaleMap = spuAttrSaleMapService.getOne(
-                new LambdaQueryWrapper<SpuAttrSaleMap>()
-                        .eq(SpuAttrSaleMap::getSpuId, req.getSpuId())
-                        .eq(SpuAttrSaleMap::getAttrId, req.getAttrId()));
+        SpuAttrSale attrSaleMap = spuAttrSaleMapService.getOne(
+                new LambdaQueryWrapper<SpuAttrSale>()
+                        .eq(SpuAttrSale::getSpuId, req.getSpuId())
+                        .eq(SpuAttrSale::getAttrId, req.getAttrId()));
         if (Objects.nonNull(attrSaleMap)) {
             throw new BizException("销售属性已绑定！");
         }
-        SpuAttrSaleMap save = new SpuAttrSaleMap();
+        SpuAttrSale save = new SpuAttrSale();
         save.setSpuId(req.getSpuId());
         save.setAttrId(req.getAttrId());
         save.setAttrName(propertySaleKey.getKeyName());
@@ -158,17 +158,17 @@ public class SpuController {
 
     @PostMapping("deleteAttrSale")
     public Result<Object> deleteAttrSale(@RequestBody SpuAttrReqVo req) {
-        SkuAttrSaleMap skuAttrSaleMap = skuAttrSaleMapService.getOne(
-                new LambdaQueryWrapper<SkuAttrSaleMap>()
-                        .eq(SkuAttrSaleMap::getSpuId, req.getSpuId())
-                        .eq(SkuAttrSaleMap::getAttrId, req.getAttrId()));
-        if (Objects.nonNull(skuAttrSaleMap)) {
+        SkuAttrSale skuAttrSale = skuAttrSaleMapService.getOne(
+                new LambdaQueryWrapper<SkuAttrSale>()
+                        .eq(SkuAttrSale::getSpuId, req.getSpuId())
+                        .eq(SkuAttrSale::getAttrId, req.getAttrId()));
+        if (Objects.nonNull(skuAttrSale)) {
             throw new BizException("已有SKU绑定该属性，无法删除！");
         }
         spuAttrSaleMapService.remove(
-                new LambdaQueryWrapper<SpuAttrSaleMap>()
-                        .eq(SpuAttrSaleMap::getSpuId, req.getSpuId())
-                        .eq(SpuAttrSaleMap::getAttrId, req.getAttrId()));
+                new LambdaQueryWrapper<SpuAttrSale>()
+                        .eq(SpuAttrSale::getSpuId, req.getSpuId())
+                        .eq(SpuAttrSale::getAttrId, req.getAttrId()));
         return Result.success();
     }
 
@@ -184,20 +184,20 @@ public class SpuController {
         spuMeta.setStatusFlag(StatusEnum.ENABLED.code);
         spuMetaService.save(spuMeta);
 
-        List<SpuAttrSaleMap> spuAttrSaleMaps = req.getSpuAttrSaleDataList().stream()
+        List<SpuAttrSale> spuAttrSales = req.getSpuAttrSaleDataList().stream()
                 .map((item) -> {
-                    SpuAttrSaleMap spuAttrSaleMap = new SpuAttrSaleMap();
-                    spuAttrSaleMap.setSpuId(spuId);
-                    spuAttrSaleMap.setAttrId(item.getKeyId());
-                    spuAttrSaleMap.setAttrName(item.getKeyName());
-                    spuAttrSaleMap.setStatusFlag(StatusEnum.ENABLED.code);
-                    return spuAttrSaleMap;
+                    SpuAttrSale spuAttrSale = new SpuAttrSale();
+                    spuAttrSale.setSpuId(spuId);
+                    spuAttrSale.setAttrId(item.getKeyId());
+                    spuAttrSale.setAttrName(item.getKeyName());
+                    spuAttrSale.setStatusFlag(StatusEnum.ENABLED.code);
+                    return spuAttrSale;
                 })
                 .collect(Collectors.toList());
-        spuAttrSaleMapService.saveBatch(spuAttrSaleMaps);
+        spuAttrSaleMapService.saveBatch(spuAttrSales);
 
         List<SkuMeta> skuSaveList = new ArrayList<>();
-        List<SkuAttrSaleMap> skuAttrSaleMapSaveList = new ArrayList<>();
+        List<SkuAttrSale> skuAttrSaleSaveList = new ArrayList<>();
         for (SpuSkuCreateReqVo.SkuItem skuItem : req.getSkuList()) {
             String skuId = idService.getId();
             SkuMeta skuMeta = new SkuMeta();
@@ -206,22 +206,22 @@ public class SpuController {
             skuMeta.setSkuName(skuItem.getSkuName());
             skuMeta.setRetailPrice(new BigDecimal(skuItem.getRetailPrice()));
             skuMeta.setStatusFlag(StatusEnum.ENABLED.code);
-            List<SkuAttrSaleMap> skuAttrSaleMaps = skuItem.getAttrList().stream()
+            List<SkuAttrSale> skuAttrSales = skuItem.getAttrList().stream()
                     .map((item) -> {
-                        SkuAttrSaleMap skuAttrSaleMap = new SkuAttrSaleMap();
-                        skuAttrSaleMap.setSpuId(spuId);
-                        skuAttrSaleMap.setSkuId(skuId);
-                        skuAttrSaleMap.setAttrId(item.getAttrId());
-                        skuAttrSaleMap.setAttrValueId(item.getAttrValueId());
-                        skuAttrSaleMap.setAttrValueName(item.getAttrValueName());
-                        skuAttrSaleMap.setStatusFlag(StatusEnum.ENABLED.code);
-                        return skuAttrSaleMap;
+                        SkuAttrSale skuAttrSale = new SkuAttrSale();
+                        skuAttrSale.setSpuId(spuId);
+                        skuAttrSale.setSkuId(skuId);
+                        skuAttrSale.setAttrId(item.getAttrId());
+                        skuAttrSale.setAttrValueId(item.getAttrValueId());
+                        skuAttrSale.setAttrValueName(item.getAttrValueName());
+                        skuAttrSale.setStatusFlag(StatusEnum.ENABLED.code);
+                        return skuAttrSale;
                     }).collect(Collectors.toList());
             skuSaveList.add(skuMeta);
-            skuAttrSaleMapSaveList.addAll(skuAttrSaleMaps);
+            skuAttrSaleSaveList.addAll(skuAttrSales);
         }
         skuMetaService.saveBatch(skuSaveList);
-        skuAttrSaleMapService.saveBatch(skuAttrSaleMapSaveList);
+        skuAttrSaleMapService.saveBatch(skuAttrSaleSaveList);
         return Result.success();
     }
 }
