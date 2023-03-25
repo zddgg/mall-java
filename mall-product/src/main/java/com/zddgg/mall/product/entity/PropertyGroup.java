@@ -37,5 +37,5 @@ public class PropertyGroup extends BaseEntity implements Serializable {
     private String status;
 
     @TableField(exist = false)
-    private List<PropertyUnitKey> propertyUnitKeys;
+    private List<AttrUnitKey> AttrUnitKeys;
 }

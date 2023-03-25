@@ -2,7 +2,7 @@ package com.zddgg.mall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zddgg.mall.product.entity.SpuAttrSaleMap;
+import com.zddgg.mall.product.entity.SpuAttrSale;
 import com.zddgg.mall.product.mapper.SpuAttrSaleMapMapper;
 import com.zddgg.mall.product.service.SpuAttrSaleMapService;
 import org.apache.commons.lang3.StringUtils;
@@ -17,17 +17,17 @@ import java.util.List;
  * @createDate 2023-03-10 12:41:23
  */
 @Service
-public class SpuAttrSaleMapServiceImpl extends ServiceImpl<SpuAttrSaleMapMapper, SpuAttrSaleMap>
+public class SpuAttrSaleMapServiceImpl extends ServiceImpl<SpuAttrSaleMapMapper, SpuAttrSale>
         implements SpuAttrSaleMapService {
 
     @Override
-    public List<SpuAttrSaleMap> getListBySpuId(String spuId) {
+    public List<SpuAttrSale> getListBySpuId(String spuId) {
         if (StringUtils.isBlank(spuId)) {
             return new ArrayList<>();
         }
         return this.list(
-                new LambdaQueryWrapper<SpuAttrSaleMap>()
-                        .eq(SpuAttrSaleMap::getSpuId, spuId)
+                new LambdaQueryWrapper<SpuAttrSale>()
+                        .eq(SpuAttrSale::getSpuId, spuId)
         );
     }
 }

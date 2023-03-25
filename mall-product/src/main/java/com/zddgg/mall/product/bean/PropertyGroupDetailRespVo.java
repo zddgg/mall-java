@@ -1,6 +1,6 @@
 package com.zddgg.mall.product.bean;
 
-import com.zddgg.mall.product.entity.PropertyUnitKey;
+import com.zddgg.mall.product.entity.AttrUnitKey;
 import lombok.Data;
 
 import java.util.List;
@@ -12,5 +12,5 @@ public class PropertyGroupDetailRespVo {
 
     private String propertyGroupName;
 
-    private List<PropertyUnitKey> propertyUnitKeys;
+    private List<AttrUnitKey> AttrUnitKeys;
 }

@@ -7,10 +7,10 @@ import com.zddgg.mall.product.bean.PropertyGroupCreateVo;
 import com.zddgg.mall.product.bean.PropertyGroupDetailReqVo;
 import com.zddgg.mall.product.bean.PropertyGroupDetailRespVo;
 import com.zddgg.mall.product.bean.PropertyGroupListReqVo;
+import com.zddgg.mall.product.entity.AttrUnitKey;
+import com.zddgg.mall.product.entity.AttrUnitValue;
 import com.zddgg.mall.product.entity.PropertyGroup;
 import com.zddgg.mall.product.entity.PropertyGroupUnit;
-import com.zddgg.mall.product.entity.PropertyUnitKey;
-import com.zddgg.mall.product.entity.PropertyUnitValue;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.*;
 import org.apache.commons.lang3.StringUtils;
@@ -30,22 +30,22 @@ public class PropertyGroupController {
 
     private final PropertyGroupService propertyGroupService;
 
-    private final PropertyGroupStoreService propertyGroupStoreService;
+    private final AttrGroupUnitService attrGroupUnitService;
 
-    private final PropertyUnitKeyService propertyUnitKeyService;
-    private final PropertyStoreValueService propertyStoreValueService;
+    private final AttrUnitKeyService attrUnitKeyService;
+    private final AttrUnitValueService attrUnitValueService;
 
     private final PropertyGroupBizService propertyGroupBizService;
 
     public PropertyGroupController(PropertyGroupService propertyGroupService,
-                                   PropertyGroupStoreService propertyGroupStoreService,
-                                   PropertyUnitKeyService propertyUnitKeyService,
-                                   PropertyStoreValueService propertyStoreValueService,
+                                   AttrGroupUnitService attrGroupUnitService,
+                                   AttrUnitKeyService attrUnitKeyService,
+                                   AttrUnitValueService attrUnitValueService,
                                    PropertyGroupBizService propertyGroupBizService) {
         this.propertyGroupService = propertyGroupService;
-        this.propertyGroupStoreService = propertyGroupStoreService;
-        this.propertyUnitKeyService = propertyUnitKeyService;
-        this.propertyStoreValueService = propertyStoreValueService;
+        this.attrGroupUnitService = attrGroupUnitService;
+        this.attrUnitKeyService = attrUnitKeyService;
+        this.attrUnitValueService = attrUnitValueService;
         this.propertyGroupBizService = propertyGroupBizService;
     }
 
@@ -82,38 +82,38 @@ public class PropertyGroupController {
         }
 
         // 查询属性组关联的属性列表
-        List<PropertyGroupUnit> groupStores = propertyGroupStoreService.list(
+        List<PropertyGroupUnit> groupStores = attrGroupUnitService.list(
                 new LambdaQueryWrapper<PropertyGroupUnit>()
                         .eq(PropertyGroupUnit::getPropertyGroupId, one.getPropertyGroupId()));
-        List<PropertyUnitKey> propertyUnitKeys = new ArrayList<>();
+        List<AttrUnitKey> AttrUnitKeys = new ArrayList<>();
         if (!CollectionUtils.isEmpty(groupStores)) {
 
             // 关联的属性key
-            propertyUnitKeys = propertyUnitKeyService.list(
-                    new LambdaQueryWrapper<PropertyUnitKey>()
-                            .in(PropertyUnitKey::getUnitKeyId,
+            AttrUnitKeys = attrUnitKeyService.list(
+                    new LambdaQueryWrapper<AttrUnitKey>()
+                            .in(AttrUnitKey::getAttrId,
                                     groupStores.stream().map(PropertyGroupUnit::getUnitKeyId)
                                             .collect(Collectors.toList())));
             Set<String> nos = new HashSet<>();
-            for (PropertyUnitKey storeKey : propertyUnitKeys) {
-                nos.add(storeKey.getUnitKeyId());
+            for (AttrUnitKey storeKey : AttrUnitKeys) {
+                nos.add(storeKey.getAttrId());
             }
 
             if (!CollectionUtils.isEmpty(nos)) {
                 // 关联的属性value
-                List<PropertyUnitValue> storeValues = propertyStoreValueService.list(
-                        new LambdaQueryWrapper<PropertyUnitValue>().in(PropertyUnitValue::getUnitKeyId, nos));
-                Map<String, List<PropertyUnitValue>> listMap = storeValues.stream()
-                        .collect(Collectors.groupingBy(PropertyUnitValue::getUnitKeyId));
-                propertyUnitKeys.forEach(propertyStoreRespVo -> {
-                    propertyStoreRespVo.setPropertyUnitValues(listMap.getOrDefault(propertyStoreRespVo.getUnitKeyId(), new ArrayList<>()));
+                List<AttrUnitValue> storeValues = attrUnitValueService.list(
+                        new LambdaQueryWrapper<AttrUnitValue>().in(AttrUnitValue::getAttrId, nos));
+                Map<String, List<AttrUnitValue>> listMap = storeValues.stream()
+                        .collect(Collectors.groupingBy(AttrUnitValue::getAttrId));
+                AttrUnitKeys.forEach(propertyStoreRespVo -> {
+                    propertyStoreRespVo.setAttrUnitValues(listMap.getOrDefault(propertyStoreRespVo.getAttrId(), new ArrayList<>()));
                 });
             }
         }
         PropertyGroupDetailRespVo res = new PropertyGroupDetailRespVo();
         res.setPropertyGroupId(one.getPropertyGroupId());
         res.setPropertyGroupName(one.getPropertyGroupName());
-        res.setPropertyUnitKeys(propertyUnitKeys);
+        res.setAttrUnitKeys(AttrUnitKeys);
         return Result.success(res);
     }
 

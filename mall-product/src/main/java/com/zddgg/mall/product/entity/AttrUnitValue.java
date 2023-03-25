@@ -8,33 +8,30 @@ import lombok.Setter;
 import java.io.Serializable;
 
 /**
- * 后台类目表
+ * 属性库value表
  *
- * @TableName spu_attr_sale_map
+ * @TableName attr_unit_value
  */
-@TableName(value = "sku_attr_sale_map")
+@TableName(value = "attr_unit_value")
 @Getter
 @Setter
-public class SkuAttrSaleMap extends BaseEntity implements Serializable {
+public class AttrUnitValue extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
-
-    @TableField(value = "spu_id")
-    private String spuId;
-
-    @TableField(value = "sku_id")
-    private String skuId;
-
+    /**
+     * 属性key编号
+     */
     @TableField(value = "attr_id")
     private String attrId;
-
-    @TableField(value = "attr_value_id")
-    private String attrValueId;
-
+    /**
+     * 属性value
+     */
     @TableField(value = "attr_value_name")
     private String attrValueName;
-
-    @TableField(value = "status_flag")
-    private String statusFlag;
+    /**
+     * 属性value顺序
+     */
+    @TableField(value = "attr_value_order")
+    private Integer attrValueOrder;
 }

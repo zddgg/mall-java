@@ -10,12 +10,12 @@ import java.io.Serializable;
 /**
  * 后台类目表
  *
- * @TableName spu_attr_sale_map
+ * @TableName sku_attr_sale
  */
-@TableName(value = "spu_attr_sale_map")
+@TableName(value = "sku_attr_sale")
 @Getter
 @Setter
-public class SpuAttrSaleMap extends BaseEntity implements Serializable {
+public class SkuAttrSale extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
@@ -23,11 +23,17 @@ public class SpuAttrSaleMap extends BaseEntity implements Serializable {
     @TableField(value = "spu_id")
     private String spuId;
 
+    @TableField(value = "sku_id")
+    private String skuId;
+
     @TableField(value = "attr_id")
     private String attrId;
 
-    @TableField(value = "attr_name")
-    private String attrName;
+    @TableField(value = "attr_value_id")
+    private String attrValueId;
+
+    @TableField(value = "attr_value_name")
+    private String attrValueName;
 
     @TableField(value = "status_flag")
     private String statusFlag;

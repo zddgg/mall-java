@@ -4,13 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zddgg.mall.product.bean.PropertyGroupCreateVo;
 import com.zddgg.mall.product.bean.PropertyGroupDetailReqVo;
 import com.zddgg.mall.product.constant.StatusEnum;
+import com.zddgg.mall.product.entity.AttrUnitKey;
 import com.zddgg.mall.product.entity.PropertyGroup;
 import com.zddgg.mall.product.entity.PropertyGroupUnit;
-import com.zddgg.mall.product.entity.PropertyUnitKey;
 import com.zddgg.mall.product.exception.BizException;
+import com.zddgg.mall.product.service.AttrGroupUnitService;
 import com.zddgg.mall.product.service.PropertyGroupBizService;
 import com.zddgg.mall.product.service.PropertyGroupService;
-import com.zddgg.mall.product.service.PropertyGroupStoreService;
 import com.zddgg.mall.product.service.PropertyUnitBizService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +24,15 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
 
     private final PropertyGroupService propertyGroupService;
 
-    private final PropertyGroupStoreService propertyGroupStoreService;
+    private final AttrGroupUnitService attrGroupUnitService;
 
     private final PropertyUnitBizService propertyUnitBizService;
 
     public PropertyGroupBizServiceImpl(PropertyGroupService propertyGroupService,
-                                       PropertyGroupStoreService propertyGroupStoreService,
+                                       AttrGroupUnitService attrGroupUnitService,
                                        PropertyUnitBizService propertyUnitBizService) {
         this.propertyGroupService = propertyGroupService;
-        this.propertyGroupStoreService = propertyGroupStoreService;
+        this.attrGroupUnitService = attrGroupUnitService;
         this.propertyUnitBizService = propertyUnitBizService;
     }
 
@@ -52,14 +52,14 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
         propertyGroupService.save(propertyGroup);
 
         ArrayList<PropertyGroupUnit> saveList = new ArrayList<>();
-        for (PropertyUnitKey propertyUnitKey : vo.getPropertyUnitKeys()) {
+        for (AttrUnitKey attrUnitKey : vo.getAttrUnitKeys()) {
             PropertyGroupUnit value = new PropertyGroupUnit();
             value.setPropertyGroupId(propertyGroup.getPropertyGroupId());
-            value.setUnitKeyId(propertyUnitKey.getUnitKeyId());
+            value.setUnitKeyId(attrUnitKey.getAttrId());
             value.setPropertyOrder(0);
             saveList.add(value);
         }
-        propertyGroupStoreService.saveBatch(saveList);
+        attrGroupUnitService.saveBatch(saveList);
     }
 
     @Transactional
@@ -74,19 +74,19 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
         one.setPropertyGroupName(vo.getPropertyGroupName());
         propertyGroupService.updateById(one);
 
-        propertyGroupStoreService.remove(
+        attrGroupUnitService.remove(
                 new LambdaQueryWrapper<PropertyGroupUnit>()
                         .eq(PropertyGroupUnit::getPropertyGroupId, one.getPropertyGroupId()));
 
         ArrayList<PropertyGroupUnit> saveList = new ArrayList<>();
-        for (PropertyUnitKey propertyUnitKey : vo.getPropertyUnitKeys()) {
+        for (AttrUnitKey attrUnitKey : vo.getAttrUnitKeys()) {
             PropertyGroupUnit value = new PropertyGroupUnit();
             value.setPropertyGroupId(one.getPropertyGroupId());
-            value.setUnitKeyId(propertyUnitKey.getUnitKeyId());
+            value.setUnitKeyId(attrUnitKey.getAttrId());
             value.setPropertyOrder(0);
             saveList.add(value);
         }
-        propertyGroupStoreService.saveBatch(saveList);
+        attrGroupUnitService.saveBatch(saveList);
     }
 
     @Transactional
@@ -95,7 +95,7 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
         propertyGroupService.remove(
                 new LambdaQueryWrapper<PropertyGroup>()
                         .eq(PropertyGroup::getPropertyGroupId, reqVo.getPropertyGroupId()));
-        propertyGroupStoreService.remove(
+        attrGroupUnitService.remove(
                 new LambdaQueryWrapper<PropertyGroupUnit>()
                         .eq(PropertyGroupUnit::getPropertyGroupId, reqVo.getPropertyGroupId()));
     }
@@ -108,7 +108,7 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
         List<PropertyGroup> propertyGroups = propertyGroupService.list(
                 new LambdaQueryWrapper<PropertyGroup>()
                         .in(PropertyGroup::getPropertyGroupId, groupIds));
-        List<PropertyGroupUnit> propertyGroupUnits = propertyGroupStoreService.list(
+        List<PropertyGroupUnit> propertyGroupUnits = attrGroupUnitService.list(
                 new LambdaQueryWrapper<PropertyGroupUnit>()
                         .in(PropertyGroupUnit::getPropertyGroupId, groupIds));
         if (!CollectionUtils.isEmpty(propertyGroupUnits)) {
@@ -117,16 +117,16 @@ public class PropertyGroupBizServiceImpl implements PropertyGroupBizService {
             Map<String, List<String>> group2StoreMap = propertyGroupUnits.stream()
                     .collect(Collectors.groupingBy(PropertyGroupUnit::getPropertyGroupId,
                             Collectors.mapping(PropertyGroupUnit::getUnitKeyId, Collectors.toList())));
-            List<PropertyUnitKey> propertyUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyIds(storeNos);
-            Map<String, PropertyUnitKey> storeMap = propertyUnitKeys
+            List<AttrUnitKey> AttrUnitKeys = propertyUnitBizService.getListAndRelatedByPropertyIds(storeNos);
+            Map<String, AttrUnitKey> storeMap = AttrUnitKeys
                     .stream()
-                    .collect(Collectors.toMap(PropertyUnitKey::getUnitKeyId,
+                    .collect(Collectors.toMap(AttrUnitKey::getAttrId,
                             propertyStoreRespVo -> propertyStoreRespVo));
             propertyGroups.forEach(propertyGroup -> {
-                List<PropertyUnitKey> storeKeys = group2StoreMap
+                List<AttrUnitKey> storeKeys = group2StoreMap
                         .getOrDefault(propertyGroup.getPropertyGroupId(), new ArrayList<>())
                         .stream().map(storeMap::get).collect(Collectors.toList());
-                propertyGroup.setPropertyUnitKeys(storeKeys);
+                propertyGroup.setAttrUnitKeys(storeKeys);
             });
 
         }

@@ -1,6 +1,6 @@
 package com.zddgg.mall.product.bean;
 
-import com.zddgg.mall.product.entity.SpuAttrSaleMap;
+import com.zddgg.mall.product.entity.SpuAttrSale;
 import com.zddgg.mall.product.entity.SpuMeta;
 import lombok.Data;
 
@@ -11,5 +11,5 @@ public class SpuDetailRespVo {
 
     private SpuMeta spuMeta;
 
-    private List<SpuAttrSaleMap> spuAttrSaleMaps;
+    private List<SpuAttrSale> spuAttrSales;
 }

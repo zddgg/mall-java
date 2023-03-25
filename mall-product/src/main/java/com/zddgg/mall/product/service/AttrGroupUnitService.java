@@ -8,6 +8,7 @@ import com.zddgg.mall.product.entity.PropertyGroupUnit;
  * @description 针对表【property_group_store(属性组-属性库关系表)】的数据库操作Service
  * @createDate 2022-12-04 08:17:08
  */
-public interface PropertyGroupStoreService extends IService<PropertyGroupUnit> {
+public interface AttrGroupUnitService extends IService<PropertyGroupUnit> {
 
+    PropertyGroupUnit getOne(PropertyGroupUnit data);
 }

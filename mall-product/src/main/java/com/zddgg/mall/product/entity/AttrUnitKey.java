@@ -11,30 +11,30 @@ import java.util.List;
 /**
  * 属性库key表
  *
- * @TableName property_store_key
+ * @TableName attr_unit_key
  */
-@TableName(value = "property_unit_key")
+@TableName(value = "attr_unit_key")
 @Getter
 @Setter
-public class PropertyUnitKey extends BaseEntity implements Serializable {
+public class AttrUnitKey extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
     /**
      * 属性key编号
      */
-    @TableField(value = "unit_key_id")
-    private String unitKeyId;
+    @TableField(value = "attr_id")
+    private String attrId;
     /**
      * 属性key名称
      */
-    @TableField(value = "unit_key_name")
-    private String unitKeyName;
+    @TableField(value = "attr_name")
+    private String attrName;
     /**
      * 属性key单位
      */
-    @TableField(value = "unit_key_unit")
-    private String unitKeyUnit;
+    @TableField(value = "unit")
+    private String unit;
     /**
      * 表单展示方式
      */
@@ -45,6 +45,7 @@ public class PropertyUnitKey extends BaseEntity implements Serializable {
      */
     @TableField(value = "status")
     private String status;
+
     @TableField(exist = false)
-    private List<PropertyUnitValue> PropertyUnitValues;
+    private List<AttrUnitValue> attrUnitValues;
 }
