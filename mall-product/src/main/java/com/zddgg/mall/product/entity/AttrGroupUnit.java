@@ -10,28 +10,28 @@ import java.io.Serializable;
 /**
  * 属性组-属性库关系表
  *
- * @TableName property_group_store
+ * @TableName attr_group_unit
  */
-@TableName(value = "property_group_unit")
+@TableName(value = "attr_group_unit")
 @Getter
 @Setter
-public class PropertyGroupUnit extends BaseEntity implements Serializable {
+public class AttrGroupUnit extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
     /**
      * 属性编号
      */
-    @TableField(value = "property_group_id")
-    private String propertyGroupId;
+    @TableField(value = "group_id")
+    private String groupId;
     /**
      * 属性名称
      */
-    @TableField(value = "unit_key_id")
-    private String unitKeyId;
+    @TableField(value = "attr_id")
+    private String attrId;
     /**
      * 属性排序
      */
-    @TableField(value = "property_order")
-    private Integer propertyOrder;
+    @TableField(value = "attr_unit_order")
+    private Integer attrUnitOrder;
 }

@@ -3,6 +3,9 @@ package com.zddgg.mall.product.biz;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.product.bean.attr.req.*;
 import com.zddgg.mall.product.bean.attr.resp.AttrUnitRecordRespVo;
+import com.zddgg.mall.product.entity.AttrUnitKey;
+
+import java.util.List;
 
 public interface AttrUnitBizService {
 
@@ -16,4 +19,5 @@ public interface AttrUnitBizService {
 
     void delete(AttrUnitDeleteReqVo req);
 
+    List<AttrUnitRecordRespVo> getRecordList(List<AttrUnitKey> unitKeyList);
 }

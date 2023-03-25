@@ -9,6 +9,10 @@ import com.zddgg.mall.product.mapper.AttrUnitKeyMapper;
 import com.zddgg.mall.product.service.AttrUnitKeyService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author 86239
@@ -34,6 +38,17 @@ public class AttrUnitKeyServiceImpl extends ServiceImpl<AttrUnitKeyMapper, AttrU
                 new LambdaQueryWrapper<AttrUnitKey>()
                         .eq(StringUtils.isNoneBlank(data.getAttrId()), AttrUnitKey::getAttrId, data.getAttrId())
                         .eq(StringUtils.isNoneBlank(data.getAttrName()), AttrUnitKey::getAttrName, data.getAttrName())
+        );
+    }
+
+    @Override
+    public List<AttrUnitKey> getListByAttrIds(List<String> attrIds) {
+        if (CollectionUtils.isEmpty(attrIds)) {
+            return new ArrayList<>();
+        }
+        return this.list(
+                new LambdaQueryWrapper<AttrUnitKey>()
+                        .in(AttrUnitKey::getAttrId, attrIds)
         );
     }
 

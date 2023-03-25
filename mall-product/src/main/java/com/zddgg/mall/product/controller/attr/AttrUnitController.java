@@ -1,4 +1,4 @@
-package com.zddgg.mall.product.controller;
+package com.zddgg.mall.product.controller.attr;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.common.response.Result;

@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.bean;
 
+import com.zddgg.mall.product.entity.AttrGroup;
 import com.zddgg.mall.product.entity.AttrUnitKey;
-import com.zddgg.mall.product.entity.PropertyGroup;
 import com.zddgg.mall.product.entity.PropertySaleKey;
 import lombok.Data;
 
@@ -19,7 +19,7 @@ public class BackendCategoryDetail {
 
     private Boolean relatedProperty;
 
-    private List<PropertyGroup> propertyGroups;
+    private List<AttrGroup> attrGroups;
 
     private List<AttrUnitKey> AttrUnitKeys;
 

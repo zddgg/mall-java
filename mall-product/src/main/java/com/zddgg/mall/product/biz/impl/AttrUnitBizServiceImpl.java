@@ -5,9 +5,9 @@ import com.zddgg.mall.product.bean.attr.req.*;
 import com.zddgg.mall.product.bean.attr.resp.AttrUnitRecordRespVo;
 import com.zddgg.mall.product.biz.AttrUnitBizService;
 import com.zddgg.mall.product.constant.StatusEnum;
+import com.zddgg.mall.product.entity.AttrGroupUnit;
 import com.zddgg.mall.product.entity.AttrUnitKey;
 import com.zddgg.mall.product.entity.AttrUnitValue;
-import com.zddgg.mall.product.entity.PropertyGroupUnit;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.AttrGroupUnitService;
 import com.zddgg.mall.product.service.AttrUnitKeyService;
@@ -44,29 +44,7 @@ public class AttrUnitBizServiceImpl implements AttrUnitBizService {
         query.setAttrName(req.getAttrName());
         Page<AttrUnitKey> page = attrUnitKeyService.page(query, req);
         if (!CollectionUtils.isEmpty(page.getRecords())) {
-            List<String> attrIds = page.getRecords().stream().map(AttrUnitKey::getAttrId)
-                    .collect(Collectors.toList());
-            List<AttrUnitValue> attrUnitValues = attrUnitValueService.getListByAttrIds(attrIds);
-            Map<String, List<AttrUnitRecordRespVo.AttrUnitValueVo>> attrIdMap = attrUnitValues.stream()
-                    .map(attrUnitValue -> {
-                        AttrUnitRecordRespVo.AttrUnitValueVo attrUnitValueVo = new AttrUnitRecordRespVo.AttrUnitValueVo();
-                        attrUnitValueVo.setAttrId(attrUnitValue.getAttrId());
-                        attrUnitValueVo.setAttrValueName(attrUnitValue.getAttrValueName());
-                        attrUnitValueVo.setAttrValueOrder(attrUnitValue.getAttrValueOrder());
-                        return attrUnitValueVo;
-                    })
-                    .collect(Collectors.groupingBy(AttrUnitRecordRespVo.AttrUnitValueVo::getAttrId));
-            List<AttrUnitRecordRespVo> unitRecords = page.getRecords().stream()
-                    .map(attrUnitKey -> {
-                        AttrUnitRecordRespVo attrUnitRecordRespVo = new AttrUnitRecordRespVo();
-                        attrUnitRecordRespVo.setAttrId(attrUnitKey.getAttrId());
-                        attrUnitRecordRespVo.setAttrName(attrUnitKey.getAttrName());
-                        attrUnitRecordRespVo.setUnit(attrUnitKey.getUnit());
-                        attrUnitRecordRespVo.setFormShowType(attrUnitKey.getFormShowType());
-                        attrUnitRecordRespVo.setStatus(attrUnitKey.getStatus());
-                        attrUnitRecordRespVo.setAttrUnitValues(attrIdMap.get(attrUnitKey.getAttrId()));
-                        return attrUnitRecordRespVo;
-                    }).collect(Collectors.toList());
+            List<AttrUnitRecordRespVo> unitRecords = getRecordList(page.getRecords());
             result.setRecords(unitRecords);
             result.setPages(page.getPages());
             result.setCurrent(page.getCurrent());
@@ -165,13 +143,40 @@ public class AttrUnitBizServiceImpl implements AttrUnitBizService {
     @Override
     public void delete(AttrUnitDeleteReqVo req) {
         // 属性组关联校验
-        PropertyGroupUnit groupUnitQuery = new PropertyGroupUnit();
-        groupUnitQuery.setUnitKeyId(req.getAttrId());
-        PropertyGroupUnit one = attrGroupUnitService.getOne(groupUnitQuery);
+        AttrGroupUnit groupUnitQuery = new AttrGroupUnit();
+        groupUnitQuery.setAttrId(req.getAttrId());
+        AttrGroupUnit one = attrGroupUnitService.getOne(groupUnitQuery);
         if (Objects.nonNull(one)) {
-            throw new BizException("属性组 [" + one.getPropertyGroupId() + " ]已关联该属性，请先解除绑定！");
+            throw new BizException("属性组 [" + one.getGroupId() + " ]已关联该属性，请先解除绑定！");
         }
         attrUnitKeyService.deleteByAttrId(req.getAttrId());
         attrUnitValueService.deleteByAttrId(req.getAttrId());
+    }
+
+    @Override
+    public List<AttrUnitRecordRespVo> getRecordList(List<AttrUnitKey> unitKeyList) {
+        List<String> attrIds = unitKeyList.stream().map(AttrUnitKey::getAttrId)
+                .collect(Collectors.toList());
+        List<AttrUnitValue> attrUnitValues = attrUnitValueService.getListByAttrIds(attrIds);
+        Map<String, List<AttrUnitRecordRespVo.AttrUnitValueVo>> attrIdMap = attrUnitValues.stream()
+                .map(attrUnitValue -> {
+                    AttrUnitRecordRespVo.AttrUnitValueVo attrUnitValueVo = new AttrUnitRecordRespVo.AttrUnitValueVo();
+                    attrUnitValueVo.setAttrId(attrUnitValue.getAttrId());
+                    attrUnitValueVo.setAttrValueName(attrUnitValue.getAttrValueName());
+                    attrUnitValueVo.setAttrValueOrder(attrUnitValue.getAttrValueOrder());
+                    return attrUnitValueVo;
+                })
+                .collect(Collectors.groupingBy(AttrUnitRecordRespVo.AttrUnitValueVo::getAttrId));
+        return unitKeyList.stream()
+                .map(attrUnitKey -> {
+                    AttrUnitRecordRespVo attrUnitRecordRespVo = new AttrUnitRecordRespVo();
+                    attrUnitRecordRespVo.setAttrId(attrUnitKey.getAttrId());
+                    attrUnitRecordRespVo.setAttrName(attrUnitKey.getAttrName());
+                    attrUnitRecordRespVo.setUnit(attrUnitKey.getUnit());
+                    attrUnitRecordRespVo.setFormShowType(attrUnitKey.getFormShowType());
+                    attrUnitRecordRespVo.setStatus(attrUnitKey.getStatus());
+                    attrUnitRecordRespVo.setAttrUnitValues(attrIdMap.get(attrUnitKey.getAttrId()));
+                    return attrUnitRecordRespVo;
+                }).collect(Collectors.toList());
     }
 }
