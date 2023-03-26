@@ -1,7 +1,7 @@
 package com.zddgg.mall.product.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.zddgg.mall.product.entity.PropertySaleKey;
+import com.zddgg.mall.product.entity.AttrSaleKey;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  */
 @Mapper
 @Repository
-public interface PropertySaleKeyMapper extends BaseMapper<PropertySaleKey> {
+public interface AttrSaleKeyMapper extends BaseMapper<AttrSaleKey> {
 
 }
 

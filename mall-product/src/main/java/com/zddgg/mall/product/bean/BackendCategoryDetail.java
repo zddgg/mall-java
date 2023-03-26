@@ -1,8 +1,8 @@
 package com.zddgg.mall.product.bean;
 
 import com.zddgg.mall.product.entity.AttrGroup;
+import com.zddgg.mall.product.entity.AttrSaleKey;
 import com.zddgg.mall.product.entity.AttrUnitKey;
-import com.zddgg.mall.product.entity.PropertySaleKey;
 import lombok.Data;
 
 import java.util.List;
@@ -23,5 +23,5 @@ public class BackendCategoryDetail {
 
     private List<AttrUnitKey> AttrUnitKeys;
 
-    private List<PropertySaleKey> propertySaleKeys;
+    private List<AttrSaleKey> attrSaleKeys;
 }

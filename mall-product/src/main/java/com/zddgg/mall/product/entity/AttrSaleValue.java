@@ -10,31 +10,31 @@ import java.io.Serializable;
 /**
  * 属性库value表
  *
- * @TableName property_sale_value
+ * @TableName attr_sale_value
  */
-@TableName(value = "property_sale_value")
+@TableName(value = "attr_sale_value")
 @Getter
 @Setter
-public class PropertySaleValue extends BaseEntity implements Serializable {
+public class AttrSaleValue extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
     /**
      * 属性key编号
      */
-    @TableField(value = "key_id")
-    private String keyId;
+    @TableField(value = "attr_id")
+    private String attrId;
 
-    @TableField(value = "value_id")
-    private String valueId;
+    @TableField(value = "attr_value_id")
+    private String attrValueId;
     /**
      * 属性value
      */
-    @TableField(value = "value_name")
-    private String valueName;
+    @TableField(value = "attr_value_name")
+    private String attrValueName;
     /**
      * 属性value顺序
      */
-    @TableField(value = "property_order")
-    private Integer propertyOrder;
+    @TableField(value = "attr_value_order")
+    private Integer attrValueOrder;
 }
