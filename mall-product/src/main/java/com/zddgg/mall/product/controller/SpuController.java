@@ -41,9 +41,9 @@ public class SpuController {
 
     private final SkuAttrSaleMapService skuAttrSaleMapService;
 
-    private final PropertySaleKeyService propertySaleKeyService;
+    private final AttrSaleKeyService attrSaleKeyService;
 
-    private final PropertySaleValueService propertySaleValueService;
+    private final AttrSaleValueService attrSaleValueService;
 
     @PostMapping("list")
     public Result<Page<SpuMeta>> list(@RequestBody PaginationReq req) {
@@ -107,21 +107,21 @@ public class SpuController {
     }
 
     @PostMapping("queryAttrList")
-    public Result<List<PropertySaleKey>> queryAttrList(@RequestBody SpuAttrReqVo req) {
+    public Result<List<AttrSaleKey>> queryAttrList(@RequestBody SpuAttrReqVo req) {
         List<SpuAttrSale> saleMaps = spuAttrSaleMapService.list(
                 new LambdaQueryWrapper<SpuAttrSale>()
                         .eq(SpuAttrSale::getSpuId, req.getSpuId()));
-        List<PropertySaleKey> saleKeys = new ArrayList<>();
+        List<AttrSaleKey> saleKeys = new ArrayList<>();
         if (!CollectionUtils.isEmpty(saleMaps)) {
             List<String> attrIds = saleMaps.stream().map(SpuAttrSale::getAttrId).collect(Collectors.toList());
-            saleKeys = propertySaleKeyService.list(
-                    new LambdaQueryWrapper<PropertySaleKey>()
-                            .in(PropertySaleKey::getKeyId, attrIds));
-            Map<String, List<PropertySaleValue>> saleValueMap = propertySaleValueService.list(
-                            new LambdaQueryWrapper<PropertySaleValue>()
-                                    .in(PropertySaleValue::getKeyId, attrIds))
-                    .stream().collect(Collectors.groupingBy(PropertySaleValue::getKeyId));
-            saleKeys.forEach((item) -> item.setPropertySaleValues(saleValueMap.get(item.getKeyId())));
+            saleKeys = attrSaleKeyService.list(
+                    new LambdaQueryWrapper<AttrSaleKey>()
+                            .in(AttrSaleKey::getAttrId, attrIds));
+            Map<String, List<AttrSaleValue>> saleValueMap = attrSaleValueService.list(
+                            new LambdaQueryWrapper<AttrSaleValue>()
+                                    .in(AttrSaleValue::getAttrId, attrIds))
+                    .stream().collect(Collectors.groupingBy(AttrSaleValue::getAttrId));
+            saleKeys.forEach((item) -> item.setAttrSaleValues(saleValueMap.get(item.getAttrId())));
         }
         return Result.success(saleKeys);
     }
@@ -134,10 +134,10 @@ public class SpuController {
         if (Objects.isNull(spuMeta)) {
             throw new BizException("SPU信息不存在！");
         }
-        PropertySaleKey propertySaleKey = propertySaleKeyService.getOne(
-                new LambdaQueryWrapper<PropertySaleKey>()
-                        .eq(PropertySaleKey::getKeyId, req.getAttrId()));
-        if (Objects.isNull(propertySaleKey)) {
+        AttrSaleKey attrSaleKey = attrSaleKeyService.getOne(
+                new LambdaQueryWrapper<AttrSaleKey>()
+                        .eq(AttrSaleKey::getAttrId, req.getAttrId()));
+        if (Objects.isNull(attrSaleKey)) {
             throw new BizException("销售属性信息不存在！");
         }
         SpuAttrSale attrSaleMap = spuAttrSaleMapService.getOne(
@@ -150,7 +150,7 @@ public class SpuController {
         SpuAttrSale save = new SpuAttrSale();
         save.setSpuId(req.getSpuId());
         save.setAttrId(req.getAttrId());
-        save.setAttrName(propertySaleKey.getKeyName());
+        save.setAttrName(attrSaleKey.getAttrName());
         save.setStatusFlag(StatusEnum.ENABLED.code);
         spuAttrSaleMapService.save(save);
         return Result.success();

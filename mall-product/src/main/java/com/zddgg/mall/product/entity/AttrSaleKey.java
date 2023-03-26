@@ -11,25 +11,25 @@ import java.util.List;
 /**
  * 属性库key表
  *
- * @TableName property_sale_key
+ * @TableName attr_sale_key
  */
-@TableName(value = "property_sale_key")
+@TableName(value = "attr_sale_key")
 @Getter
 @Setter
-public class PropertySaleKey extends BaseEntity implements Serializable {
+public class AttrSaleKey extends BaseEntity implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
     /**
      * 属性key编号
      */
-    @TableField(value = "key_id")
-    private String keyId;
+    @TableField(value = "attr_id")
+    private String attrId;
     /**
      * 属性key名称
      */
-    @TableField(value = "key_name")
-    private String keyName;
+    @TableField(value = "attr_name")
+    private String attrName;
     /**
      * 状态: 0-停用, 1-启用, -1-删除
      */
@@ -37,5 +37,5 @@ public class PropertySaleKey extends BaseEntity implements Serializable {
     private String status;
 
     @TableField(exist = false)
-    private List<PropertySaleValue> propertySaleValues;
+    private List<AttrSaleValue> attrSaleValues;
 }

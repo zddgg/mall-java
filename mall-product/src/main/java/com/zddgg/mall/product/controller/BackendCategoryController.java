@@ -5,9 +5,9 @@ import com.zddgg.mall.common.response.PaginationRes;
 import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.bean.*;
 import com.zddgg.mall.product.constant.StatusEnum;
+import com.zddgg.mall.product.entity.AttrSaleKey;
 import com.zddgg.mall.product.entity.BackendCategory;
 import com.zddgg.mall.product.entity.CategoryPropertySale;
-import com.zddgg.mall.product.entity.PropertySaleKey;
 import com.zddgg.mall.product.exception.BizException;
 import com.zddgg.mall.product.service.*;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class BackendCategoryController {
 
     private final BackendCategoryBizService backendCategoryBizService;
 
-    private final PropertySaleKeyService propertySaleKeyService;
+    private final AttrSaleKeyService attrSaleKeyService;
 
     private final CategoryPropertySaleService categoryPropertySaleService;
 
@@ -111,13 +111,13 @@ public class BackendCategoryController {
         List<CategoryPropertySale> propertySaleList = categoryPropertySaleService.list(
                 new LambdaQueryWrapper<CategoryPropertySale>()
                         .eq(CategoryPropertySale::getCategoryId, reqVo.getCategoryId()));
-        List<PropertySaleKey> propertySaleKeys = new ArrayList<>();
+        List<AttrSaleKey> attrSaleKeys = new ArrayList<>();
         if (!CollectionUtils.isEmpty(propertySaleList)) {
             List<String> attrIds = propertySaleList.stream().map(CategoryPropertySale::getPropertySaleId)
                     .collect(Collectors.toList());
-            propertySaleKeys = propertySaleBizService.getListAndRelatedByPropertyIds(attrIds);
+            attrSaleKeys = propertySaleBizService.getListAndRelatedByPropertyIds(attrIds);
         }
-        return Result.success(propertySaleKeys);
+        return Result.success(attrSaleKeys);
     }
 
     @PostMapping("addAttrSale")
@@ -128,10 +128,10 @@ public class BackendCategoryController {
         if (Objects.isNull(backendCategory)) {
             throw new BizException("后台类目信息不存在！");
         }
-        PropertySaleKey propertySaleKey = propertySaleKeyService.getOne(
-                new LambdaQueryWrapper<PropertySaleKey>()
-                        .eq(PropertySaleKey::getKeyId, reqVo.getAttrId()));
-        if (Objects.isNull(propertySaleKey)) {
+        AttrSaleKey attrSaleKey = attrSaleKeyService.getOne(
+                new LambdaQueryWrapper<AttrSaleKey>()
+                        .eq(AttrSaleKey::getAttrId, reqVo.getAttrId()));
+        if (Objects.isNull(attrSaleKey)) {
             throw new BizException("销售属性信息不存在！");
         }
         CategoryPropertySale categoryPropertySale = categoryPropertySaleService.getOne(

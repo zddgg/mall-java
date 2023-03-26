@@ -1,11 +1,11 @@
 package com.zddgg.mall.product.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.zddgg.mall.product.entity.PropertySaleKey;
-import com.zddgg.mall.product.entity.PropertySaleValue;
+import com.zddgg.mall.product.entity.AttrSaleKey;
+import com.zddgg.mall.product.entity.AttrSaleValue;
+import com.zddgg.mall.product.service.AttrSaleKeyService;
+import com.zddgg.mall.product.service.AttrSaleValueService;
 import com.zddgg.mall.product.service.PropertySaleBizService;
-import com.zddgg.mall.product.service.PropertySaleKeyService;
-import com.zddgg.mall.product.service.PropertySaleValueService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -19,25 +19,25 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PropertySaleBizServiceImpl implements PropertySaleBizService {
 
-    private final PropertySaleKeyService propertySaleKeyService;
+    private final AttrSaleKeyService attrSaleKeyService;
 
-    private final PropertySaleValueService propertySaleValueService;
+    private final AttrSaleValueService attrSaleValueService;
 
     @Override
-    public List<PropertySaleKey> getListAndRelatedByPropertyIds(List<String> propertyIds) {
+    public List<AttrSaleKey> getListAndRelatedByPropertyIds(List<String> propertyIds) {
         if (CollectionUtils.isEmpty(propertyIds)) {
             return new ArrayList<>();
         }
-        List<PropertySaleKey> propertySaleKeys = propertySaleKeyService.list(
-                new LambdaQueryWrapper<PropertySaleKey>()
-                        .in(PropertySaleKey::getKeyId, propertyIds));
-        List<PropertySaleValue> propertySaleValues = propertySaleValueService.list(
-                new LambdaQueryWrapper<PropertySaleValue>()
-                        .in(PropertySaleValue::getKeyId, propertyIds));
-        Map<String, List<PropertySaleValue>> propertyKeyNoMap = propertySaleValues.stream()
-                .collect(Collectors.groupingBy(PropertySaleValue::getKeyId));
-        propertySaleKeys.forEach(propertyStoreKey ->
-                propertyStoreKey.setPropertySaleValues(propertyKeyNoMap.get(propertyStoreKey.getKeyId())));
-        return propertySaleKeys;
+        List<AttrSaleKey> attrSaleKeys = attrSaleKeyService.list(
+                new LambdaQueryWrapper<AttrSaleKey>()
+                        .in(AttrSaleKey::getAttrId, propertyIds));
+        List<AttrSaleValue> attrSaleValues = attrSaleValueService.list(
+                new LambdaQueryWrapper<AttrSaleValue>()
+                        .in(AttrSaleValue::getAttrId, propertyIds));
+        Map<String, List<AttrSaleValue>> propertyKeyNoMap = attrSaleValues.stream()
+                .collect(Collectors.groupingBy(AttrSaleValue::getAttrId));
+        attrSaleKeys.forEach(propertyStoreKey ->
+                propertyStoreKey.setAttrSaleValues(propertyKeyNoMap.get(propertyStoreKey.getAttrId())));
+        return attrSaleKeys;
     }
 }

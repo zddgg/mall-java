@@ -288,7 +288,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         page.getRecords().forEach(backendCategoryNode -> {
             List<AttrGroup> attrGroupList = getPropertyGroupList(backendCategoryNode.getCategoryId());
             List<AttrUnitKey> propertyStoreList = getPropertyUnitList(backendCategoryNode.getCategoryId());
-            List<PropertySaleKey> propertySaleList = getPropertySaleList(backendCategoryNode.getCategoryId());
+            List<AttrSaleKey> propertySaleList = getPropertySaleList(backendCategoryNode.getCategoryId());
             backendCategoryNode.setGroupCount(attrGroupList.size());
             backendCategoryNode.setStoreCount(propertyStoreList.size());
             backendCategoryNode.setSaleCount(propertySaleList.size());
@@ -313,7 +313,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         List<AttrUnitKey> AttrUnitKeys = getPropertyUnitList(backendCategoryNo);
 
         // 销售属性信息
-        List<PropertySaleKey> propertySaleKeys = getPropertySaleList(backendCategoryNo);
+        List<AttrSaleKey> attrSaleKeys = getPropertySaleList(backendCategoryNo);
 
         BackendCategoryDetail respVo = new BackendCategoryDetail();
         respVo.setCategoryId(backendCategory.getCategoryId());
@@ -323,7 +323,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         respVo.setRelatedProperty(!CollectionUtils.isEmpty(attrGroupList) || !CollectionUtils.isEmpty(AttrUnitKeys));
         respVo.setAttrGroups(attrGroupList);
         respVo.setAttrUnitKeys(AttrUnitKeys);
-        respVo.setPropertySaleKeys(propertySaleKeys);
+        respVo.setAttrSaleKeys(attrSaleKeys);
         return respVo;
     }
 
@@ -355,7 +355,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         return propertyUnitBizService.getListAndRelatedByPropertyIds(propertyIds);
     }
 
-    private List<PropertySaleKey> getPropertySaleList(String backendCategoryId) {
+    private List<AttrSaleKey> getPropertySaleList(String backendCategoryId) {
         if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }
