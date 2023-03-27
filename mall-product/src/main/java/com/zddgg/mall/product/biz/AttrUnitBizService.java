@@ -19,5 +19,8 @@ public interface AttrUnitBizService {
 
     void delete(AttrUnitDeleteReqVo req);
 
-    List<AttrUnitRecordRespVo> getRecordList(List<AttrUnitKey> unitKeyList);
+    List<AttrUnitRecordRespVo> getRecordListByAttrUnitKeys(List<AttrUnitKey> unitKeyList);
+
+    List<AttrUnitRecordRespVo> getRecordListByAttrIds(List<String> attrIds);
+
 }

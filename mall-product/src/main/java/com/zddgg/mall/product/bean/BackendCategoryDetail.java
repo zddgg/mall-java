@@ -1,8 +1,8 @@
 package com.zddgg.mall.product.bean;
 
-import com.zddgg.mall.product.entity.AttrGroup;
-import com.zddgg.mall.product.entity.AttrSaleKey;
-import com.zddgg.mall.product.entity.AttrUnitKey;
+import com.zddgg.mall.product.bean.attr.resp.AttrGroupRecordRespVo;
+import com.zddgg.mall.product.bean.attr.resp.AttrSaleRecordRespVo;
+import com.zddgg.mall.product.bean.attr.resp.AttrUnitRecordRespVo;
 import lombok.Data;
 
 import java.util.List;
@@ -17,11 +17,11 @@ public class BackendCategoryDetail {
 
     private Integer level;
 
-    private Boolean relatedProperty;
+    private Boolean relatedAttr;
 
-    private List<AttrGroup> attrGroups;
+    private List<AttrUnitRecordRespVo> attrUnitRecords;
 
-    private List<AttrUnitKey> AttrUnitKeys;
+    private List<AttrGroupRecordRespVo> attrGroupRecords;
 
-    private List<AttrSaleKey> attrSaleKeys;
+    private List<AttrSaleRecordRespVo> attrSaleRecords;
 }

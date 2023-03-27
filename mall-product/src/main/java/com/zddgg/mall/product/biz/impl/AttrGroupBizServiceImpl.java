@@ -20,10 +20,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,30 +45,7 @@ public class AttrGroupBizServiceImpl implements AttrGroupBizService {
         groupQuery.setGroupName(req.getGroupName());
         Page<AttrGroup> page = attrGroupService.page(groupQuery, req);
         if (!CollectionUtils.isEmpty(page.getRecords())) {
-            List<String> groupIds = page.getRecords().stream()
-                    .map(AttrGroup::getGroupId)
-                    .collect(Collectors.toList());
-            List<AttrGroupUnit> groupUnitList = attrGroupUnitService.getListByGroupIds(groupIds);
-            Map<String, List<AttrGroupUnit>> groupId2GroupUnitList = groupUnitList.stream().collect(Collectors.groupingBy(AttrGroupUnit::getGroupId));
-            List<String> attrIds = groupUnitList.stream().map(AttrGroupUnit::getAttrId).collect(Collectors.toList());
-            List<AttrUnitKey> unitKeyList = attrUnitKeyService.getListByAttrIds(attrIds);
-            Map<String, AttrUnitRecordRespVo> attrIdMap2AttrUnitRecord = attrUnitBizService.getRecordList(unitKeyList)
-                    .stream()
-                    .collect(Collectors.toMap(AttrUnitRecordRespVo::getAttrId, v -> v, (v1, v2) -> v1));
-            List<AttrGroupRecordRespVo> attrGroupRecordRespVoList = page.getRecords()
-                    .stream()
-                    .map(attrGroup -> {
-                        List<AttrUnitRecordRespVo> attrUnitRecordRespList = groupId2GroupUnitList.getOrDefault(attrGroup.getGroupId(), new ArrayList<>())
-                                .stream()
-                                .map(attrGroupUnit -> attrIdMap2AttrUnitRecord.get(attrGroupUnit.getAttrId()))
-                                .collect(Collectors.toList());
-                        AttrGroupRecordRespVo attrGroupRecordRespVo = new AttrGroupRecordRespVo();
-                        attrGroupRecordRespVo.setGroupId(attrGroup.getGroupId());
-                        attrGroupRecordRespVo.setGroupName(attrGroup.getGroupName());
-                        attrGroupRecordRespVo.setStatus(attrGroup.getStatus());
-                        attrGroupRecordRespVo.setAttrUnitRecords(attrUnitRecordRespList);
-                        return attrGroupRecordRespVo;
-                    }).collect(Collectors.toList());
+            List<AttrGroupRecordRespVo> attrGroupRecordRespVoList = getRecordListByAttrGroups(page.getRecords());
             result.setRecords(attrGroupRecordRespVoList);
             result.setPages(page.getPages());
             result.setCurrent(page.getCurrent());
@@ -109,22 +83,8 @@ public class AttrGroupBizServiceImpl implements AttrGroupBizService {
         AttrGroup groupQuery = new AttrGroup();
         groupQuery.setGroupId(req.getGroupId());
         AttrGroup attrGroup = attrGroupService.getOne(groupQuery);
-        List<AttrGroupUnit> groupUnitList = attrGroupUnitService.getListByGroupId(req.getGroupId());
-        List<String> attrIds = groupUnitList.stream().map(AttrGroupUnit::getAttrId).collect(Collectors.toList());
-        List<AttrUnitKey> unitKeyList = attrUnitKeyService.getListByAttrIds(attrIds);
-        Map<String, AttrUnitRecordRespVo> attrIdMap2AttrUnitRecord = attrUnitBizService.getRecordList(unitKeyList)
-                .stream()
-                .collect(Collectors.toMap(AttrUnitRecordRespVo::getAttrId, v -> v, (v1, v2) -> v1));
-        List<AttrUnitRecordRespVo> attrUnitRecordRespList = groupUnitList
-                .stream()
-                .map(attrGroupUnit -> attrIdMap2AttrUnitRecord.get(attrGroupUnit.getAttrId()))
-                .collect(Collectors.toList());
-        AttrGroupRecordRespVo attrGroupRecordRespVo = new AttrGroupRecordRespVo();
-        attrGroupRecordRespVo.setGroupId(attrGroup.getGroupId());
-        attrGroupRecordRespVo.setGroupName(attrGroup.getGroupName());
-        attrGroupRecordRespVo.setStatus(attrGroup.getStatus());
-        attrGroupRecordRespVo.setAttrUnitRecords(attrUnitRecordRespList);
-        return attrGroupRecordRespVo;
+        List<AttrGroupRecordRespVo> respVoList = getRecordListByAttrGroups(Collections.singletonList(attrGroup));
+        return !CollectionUtils.isEmpty(respVoList) ? respVoList.get(0) : null;
     }
 
     @Override
@@ -162,7 +122,7 @@ public class AttrGroupBizServiceImpl implements AttrGroupBizService {
         List<AttrGroupUnit> groupUnitList = attrGroupUnitService.getListByGroupId(req.getGroupId());
         List<String> attrIds = groupUnitList.stream().map(AttrGroupUnit::getAttrId).collect(Collectors.toList());
         List<AttrUnitKey> unitKeyList = attrUnitKeyService.getListByAttrIds(attrIds);
-        Map<String, AttrUnitRecordRespVo> attrIdMap2AttrUnitRecord = attrUnitBizService.getRecordList(unitKeyList)
+        Map<String, AttrUnitRecordRespVo> attrIdMap2AttrUnitRecord = attrUnitBizService.getRecordListByAttrUnitKeys(unitKeyList)
                 .stream()
                 .collect(Collectors.toMap(AttrUnitRecordRespVo::getAttrId, v -> v, (v1, v2) -> v1));
         return groupUnitList
@@ -179,5 +139,43 @@ public class AttrGroupBizServiceImpl implements AttrGroupBizService {
         attrGroupUnitService.remove(
                 new LambdaQueryWrapper<AttrGroupUnit>()
                         .eq(AttrGroupUnit::getGroupId, req.getGroupId()));
+    }
+
+    @Override
+    public List<AttrGroupRecordRespVo> getRecordListByAttrGroups(List<AttrGroup> attrGroups) {
+        List<String> groupIds = attrGroups.stream().map(AttrGroup::getGroupId).collect(Collectors.toList());
+        List<AttrGroupUnit> groupUnitList = attrGroupUnitService.getListByGroupIds(groupIds);
+        Map<String, List<AttrGroupUnit>> groupId2GroupUnitList = groupUnitList.stream().collect(Collectors.groupingBy(AttrGroupUnit::getGroupId));
+        List<String> attrIds = groupUnitList.stream().map(AttrGroupUnit::getAttrId).collect(Collectors.toList());
+        List<AttrUnitKey> unitKeyList = attrUnitKeyService.getListByAttrIds(attrIds);
+        Map<String, AttrUnitRecordRespVo> attrIdMap2AttrUnitRecord = attrUnitBizService.getRecordListByAttrUnitKeys(unitKeyList)
+                .stream()
+                .collect(Collectors.toMap(AttrUnitRecordRespVo::getAttrId, v -> v, (v1, v2) -> v1));
+        return attrGroups
+                .stream()
+                .map(attrGroup -> {
+                    List<AttrUnitRecordRespVo> attrUnitRecordRespList = groupId2GroupUnitList.getOrDefault(attrGroup.getGroupId(), new ArrayList<>())
+                            .stream()
+                            .map(attrGroupUnit -> attrIdMap2AttrUnitRecord.get(attrGroupUnit.getAttrId()))
+                            .collect(Collectors.toList());
+                    AttrGroupRecordRespVo attrGroupRecordRespVo = new AttrGroupRecordRespVo();
+                    attrGroupRecordRespVo.setGroupId(attrGroup.getGroupId());
+                    attrGroupRecordRespVo.setGroupName(attrGroup.getGroupName());
+                    attrGroupRecordRespVo.setStatus(attrGroup.getStatus());
+                    attrGroupRecordRespVo.setAttrUnitRecords(attrUnitRecordRespList);
+                    return attrGroupRecordRespVo;
+                }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttrGroupRecordRespVo> getRecordListByGroupIds(List<String> groupIds) {
+        if (CollectionUtils.isEmpty(groupIds)) {
+            return new ArrayList<>();
+        }
+        List<AttrGroup> attrGroups = attrGroupService.list(
+                new LambdaQueryWrapper<AttrGroup>()
+                        .in(AttrGroup::getGroupId, groupIds)
+        );
+        return getRecordListByAttrGroups(attrGroups);
     }
 }
