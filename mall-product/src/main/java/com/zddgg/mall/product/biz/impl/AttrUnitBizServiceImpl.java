@@ -1,5 +1,6 @@
 package com.zddgg.mall.product.biz.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.product.bean.attr.req.*;
 import com.zddgg.mall.product.bean.attr.resp.AttrUnitRecordRespVo;
@@ -44,7 +45,7 @@ public class AttrUnitBizServiceImpl implements AttrUnitBizService {
         query.setAttrName(req.getAttrName());
         Page<AttrUnitKey> page = attrUnitKeyService.page(query, req);
         if (!CollectionUtils.isEmpty(page.getRecords())) {
-            List<AttrUnitRecordRespVo> unitRecords = getRecordList(page.getRecords());
+            List<AttrUnitRecordRespVo> unitRecords = getRecordListByAttrUnitKeys(page.getRecords());
             result.setRecords(unitRecords);
             result.setPages(page.getPages());
             result.setCurrent(page.getCurrent());
@@ -154,7 +155,7 @@ public class AttrUnitBizServiceImpl implements AttrUnitBizService {
     }
 
     @Override
-    public List<AttrUnitRecordRespVo> getRecordList(List<AttrUnitKey> unitKeyList) {
+    public List<AttrUnitRecordRespVo> getRecordListByAttrUnitKeys(List<AttrUnitKey> unitKeyList) {
         List<String> attrIds = unitKeyList.stream().map(AttrUnitKey::getAttrId)
                 .collect(Collectors.toList());
         List<AttrUnitValue> attrUnitValues = attrUnitValueService.getListByAttrIds(attrIds);
@@ -178,5 +179,17 @@ public class AttrUnitBizServiceImpl implements AttrUnitBizService {
                     attrUnitRecordRespVo.setAttrUnitValues(attrIdMap.get(attrUnitKey.getAttrId()));
                     return attrUnitRecordRespVo;
                 }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttrUnitRecordRespVo> getRecordListByAttrIds(List<String> attrIds) {
+        if (CollectionUtils.isEmpty(attrIds)) {
+            return new ArrayList<>();
+        }
+        List<AttrUnitKey> attrUnitKeys = attrUnitKeyService.list(
+                new LambdaQueryWrapper<AttrUnitKey>()
+                        .in(AttrUnitKey::getAttrId, attrIds)
+        );
+        return getRecordListByAttrUnitKeys(attrUnitKeys);
     }
 }

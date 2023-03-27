@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zddgg.mall.product.bean.attr.req.*;
 import com.zddgg.mall.product.bean.attr.resp.AttrGroupRecordRespVo;
 import com.zddgg.mall.product.bean.attr.resp.AttrUnitRecordRespVo;
+import com.zddgg.mall.product.entity.AttrGroup;
 
 import java.util.List;
 
@@ -22,4 +23,8 @@ public interface AttrGroupBizService {
     List<AttrUnitRecordRespVo> getBindAttrUnit(AttrGroupBindReqVo req);
 
     void delete(AttrGroupDeleteReqVo req);
+
+    List<AttrGroupRecordRespVo> getRecordListByAttrGroups(List<AttrGroup> attrGroups);
+
+    List<AttrGroupRecordRespVo> getRecordListByGroupIds(List<String> groupIds);
 }

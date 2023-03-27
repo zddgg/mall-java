@@ -1,16 +1,30 @@
-package com.zddgg.mall.product.service.impl;
+package com.zddgg.mall.product.biz.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zddgg.mall.common.response.PaginationRes;
 import com.zddgg.mall.common.response.Result;
-import com.zddgg.mall.product.bean.BackendCategoryCreateReqVo;
 import com.zddgg.mall.product.bean.BackendCategoryDetail;
 import com.zddgg.mall.product.bean.BackendCategoryListVo;
 import com.zddgg.mall.product.bean.BackendCategoryNode;
+import com.zddgg.mall.product.bean.attr.resp.AttrGroupRecordRespVo;
+import com.zddgg.mall.product.bean.attr.resp.AttrSaleRecordRespVo;
+import com.zddgg.mall.product.bean.attr.resp.AttrUnitRecordRespVo;
+import com.zddgg.mall.product.bean.category.backend.req.BackendCategoryCreateReqVo;
+import com.zddgg.mall.product.bean.category.backend.req.BackendCategoryUpdateReqVo;
+import com.zddgg.mall.product.biz.AttrGroupBizService;
+import com.zddgg.mall.product.biz.AttrSaleBizService;
+import com.zddgg.mall.product.biz.AttrUnitBizService;
+import com.zddgg.mall.product.biz.BackendCategoryBizService;
 import com.zddgg.mall.product.constant.StatusEnum;
-import com.zddgg.mall.product.entity.*;
+import com.zddgg.mall.product.entity.BackendCategory;
+import com.zddgg.mall.product.entity.CategoryPropertyGroup;
+import com.zddgg.mall.product.entity.CategoryPropertySale;
+import com.zddgg.mall.product.entity.CategoryPropertyUnit;
 import com.zddgg.mall.product.exception.BizException;
-import com.zddgg.mall.product.service.*;
+import com.zddgg.mall.product.service.BackendCategoryService;
+import com.zddgg.mall.product.service.CategoryPropertyGroupService;
+import com.zddgg.mall.product.service.CategoryPropertySaleService;
+import com.zddgg.mall.product.service.CategoryPropertyUnitService;
 import com.zddgg.mall.product.utils.MemoryPagination;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -33,11 +47,11 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
 
     private final CategoryPropertySaleService categoryPropertySaleService;
 
-    private final PropertyGroupBizService propertyGroupBizService;
+    private final AttrUnitBizService attrUnitBizService;
 
-    private final PropertyUnitBizService propertyUnitBizService;
+    private final AttrGroupBizService attrGroupBizService;
 
-    private final PropertySaleBizService propertySaleBizService;
+    private final AttrSaleBizService attrSaleBizService;
 
     /**
      * 从跟类目开始生成类目树
@@ -114,48 +128,6 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         // 保存后台类目信息
         BackendCategory newBackendCategory = buildNewBackendCategory(categoryParent, reqVo.getCategoryName());
         backendCategoryService.save(newBackendCategory);
-
-        // 保存类目属性组信息
-        List<String> propertyGroupIdList = reqVo.getPropertyGroupIds();
-        if (!CollectionUtils.isEmpty(propertyGroupIdList)) {
-            List<CategoryPropertyGroup> saveList = propertyGroupIdList.stream().map((propertyGroupId) -> {
-                CategoryPropertyGroup categoryPropertyGroup = new CategoryPropertyGroup();
-                categoryPropertyGroup.setCategoryId(newBackendCategory.getCategoryId());
-                categoryPropertyGroup.setPropertyGroupId(propertyGroupId);
-                categoryPropertyGroup.setOrderNo(0);
-                categoryPropertyGroup.setStatus(StatusEnum.DELETED.code);
-                return categoryPropertyGroup;
-            }).collect(Collectors.toList());
-            categoryPropertyGroupService.saveBatch(saveList);
-        }
-
-        // 保存类目属性库信息
-        List<String> propertyUnitIds = reqVo.getPropertyUnitIds();
-        if (!CollectionUtils.isEmpty(propertyUnitIds)) {
-            List<CategoryPropertyUnit> saveList = propertyUnitIds.stream().map((propertyUnitId) -> {
-                CategoryPropertyUnit categoryPropertyUnit = new CategoryPropertyUnit();
-                categoryPropertyUnit.setCategoryId(newBackendCategory.getCategoryId());
-                categoryPropertyUnit.setPropertyUnitId(propertyUnitId);
-                categoryPropertyUnit.setOrderNo(0);
-                categoryPropertyUnit.setStatus(StatusEnum.DISABLED.code);
-                return categoryPropertyUnit;
-            }).collect(Collectors.toList());
-            categoryPropertyUnitService.saveBatch(saveList);
-        }
-
-        // 保存销售属性信息
-        List<String> propertySaleIds = reqVo.getPropertySaleIds();
-        if (!CollectionUtils.isEmpty(propertySaleIds)) {
-            List<CategoryPropertySale> saveList = propertySaleIds.stream().map((propertySaleKeyId) -> {
-                CategoryPropertySale categoryPropertySale = new CategoryPropertySale();
-                categoryPropertySale.setCategoryId(newBackendCategory.getCategoryId());
-                categoryPropertySale.setPropertySaleId(propertySaleKeyId);
-                categoryPropertySale.setOrderNo(0);
-                categoryPropertySale.setStatus(StatusEnum.DISABLED.code);
-                return categoryPropertySale;
-            }).collect(Collectors.toList());
-            categoryPropertySaleService.saveBatch(saveList);
-        }
     }
 
     @Override
@@ -196,7 +168,7 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
 
     @Transactional
     @Override
-    public void update(BackendCategoryCreateReqVo reqVo) {
+    public void update(BackendCategoryUpdateReqVo reqVo) {
         // 上级类目校验
         BackendCategory parentCategory = categoryParentCheck(reqVo.getParentId());
         if (!(StringUtils.isBlank(reqVo.getParentId())
@@ -286,12 +258,12 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
         list = list.stream().sorted(Comparator.comparing(BackendCategoryNode::getId)).collect(Collectors.toList());
         PaginationRes<BackendCategoryNode> page = MemoryPagination.page(list, vo.getCurrent(), vo.getPageSize());
         page.getRecords().forEach(backendCategoryNode -> {
-            List<AttrGroup> attrGroupList = getPropertyGroupList(backendCategoryNode.getCategoryId());
-            List<AttrUnitKey> propertyStoreList = getPropertyUnitList(backendCategoryNode.getCategoryId());
-            List<AttrSaleKey> propertySaleList = getPropertySaleList(backendCategoryNode.getCategoryId());
-            backendCategoryNode.setGroupCount(attrGroupList.size());
-            backendCategoryNode.setStoreCount(propertyStoreList.size());
-            backendCategoryNode.setSaleCount(propertySaleList.size());
+            List<AttrUnitRecordRespVo> attrUnitRecords = getAttrUnitRecordList(backendCategoryNode.getCategoryId());
+            List<AttrGroupRecordRespVo> attrGroupRecords = getAttrGroupRecordList(backendCategoryNode.getCategoryId());
+            List<AttrSaleRecordRespVo> attrSaleRecords = getAttrSaleRecordList(backendCategoryNode.getCategoryId());
+            backendCategoryNode.setGroupCount(attrUnitRecords.size());
+            backendCategoryNode.setStoreCount(attrGroupRecords.size());
+            backendCategoryNode.setSaleCount(attrSaleRecords.size());
         });
         return Result.success(page);
     }
@@ -306,28 +278,42 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
             return null;
         }
 
-        // 属性组信息查询
-        List<AttrGroup> attrGroupList = getPropertyGroupList(backendCategoryNo);
-
         // 属性库信息查询
-        List<AttrUnitKey> AttrUnitKeys = getPropertyUnitList(backendCategoryNo);
+        List<AttrUnitRecordRespVo> attrUnitRecords = getAttrUnitRecordList(backendCategoryNo);
+
+        // 属性组信息查询
+        List<AttrGroupRecordRespVo> attrGroupRecords = getAttrGroupRecordList(backendCategoryNo);
 
         // 销售属性信息
-        List<AttrSaleKey> attrSaleKeys = getPropertySaleList(backendCategoryNo);
+        List<AttrSaleRecordRespVo> attrSaleRecords = getAttrSaleRecordList(backendCategoryNo);
 
         BackendCategoryDetail respVo = new BackendCategoryDetail();
         respVo.setCategoryId(backendCategory.getCategoryId());
         respVo.setCategoryName(backendCategory.getCategoryName());
         respVo.setParentId(backendCategory.getParentId());
         respVo.setLevel(backendCategory.getLevel());
-        respVo.setRelatedProperty(!CollectionUtils.isEmpty(attrGroupList) || !CollectionUtils.isEmpty(AttrUnitKeys));
-        respVo.setAttrGroups(attrGroupList);
-        respVo.setAttrUnitKeys(AttrUnitKeys);
-        respVo.setAttrSaleKeys(attrSaleKeys);
+        respVo.setRelatedAttr(!CollectionUtils.isEmpty(attrGroupRecords) || !CollectionUtils.isEmpty(attrUnitRecords));
+        respVo.setAttrUnitRecords(attrUnitRecords);
+        respVo.setAttrGroupRecords(attrGroupRecords);
+        respVo.setAttrSaleRecords(attrSaleRecords);
         return respVo;
     }
 
-    private List<AttrGroup> getPropertyGroupList(String backendCategoryId) {
+    private List<AttrUnitRecordRespVo> getAttrUnitRecordList(String backendCategoryId) {
+        if (StringUtils.isBlank(backendCategoryId)) {
+            return new ArrayList<>();
+        }
+        // 属性库信息查询
+        List<String> attrIds = categoryPropertyUnitService.list(
+                        new LambdaQueryWrapper<CategoryPropertyUnit>()
+                                .eq(CategoryPropertyUnit::getCategoryId, backendCategoryId))
+                .stream()
+                .map(CategoryPropertyUnit::getPropertyUnitId)
+                .collect(Collectors.toList());
+        return attrUnitBizService.getRecordListByAttrIds(attrIds);
+    }
+
+    private List<AttrGroupRecordRespVo> getAttrGroupRecordList(String backendCategoryId) {
         if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }
@@ -338,35 +324,21 @@ public class BackendCategoryBizServiceImpl implements BackendCategoryBizService 
                 .stream()
                 .map(CategoryPropertyGroup::getPropertyGroupId)
                 .collect(Collectors.toList());
-        return propertyGroupBizService.getListAndRelatedByGroupIds(groupNos);
+        return attrGroupBizService.getRecordListByGroupIds(groupNos);
     }
 
-    private List<AttrUnitKey> getPropertyUnitList(String backendCategoryId) {
+    private List<AttrSaleRecordRespVo> getAttrSaleRecordList(String backendCategoryId) {
         if (StringUtils.isBlank(backendCategoryId)) {
             return new ArrayList<>();
         }
         // 属性库信息查询
-        List<String> propertyIds = categoryPropertyUnitService.list(
-                        new LambdaQueryWrapper<CategoryPropertyUnit>()
-                                .eq(CategoryPropertyUnit::getCategoryId, backendCategoryId))
-                .stream()
-                .map(CategoryPropertyUnit::getPropertyUnitId)
-                .collect(Collectors.toList());
-        return propertyUnitBizService.getListAndRelatedByPropertyIds(propertyIds);
-    }
-
-    private List<AttrSaleKey> getPropertySaleList(String backendCategoryId) {
-        if (StringUtils.isBlank(backendCategoryId)) {
-            return new ArrayList<>();
-        }
-        // 属性库信息查询
-        List<String> propertyIds = categoryPropertySaleService.list(
+        List<String> attrIds = categoryPropertySaleService.list(
                         new LambdaQueryWrapper<CategoryPropertySale>()
                                 .eq(CategoryPropertySale::getCategoryId, backendCategoryId))
                 .stream()
                 .map(CategoryPropertySale::getPropertySaleId)
                 .collect(Collectors.toList());
-        return propertySaleBizService.getListAndRelatedByPropertyIds(propertyIds);
+        return attrSaleBizService.getRecordListByAttrIds(attrIds);
     }
 
     private BackendCategory categoryParentCheck(String parentCategoryId) {

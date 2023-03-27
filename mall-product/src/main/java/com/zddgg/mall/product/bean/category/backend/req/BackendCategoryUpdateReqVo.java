@@ -1,11 +1,11 @@
-package com.zddgg.mall.product.bean;
+package com.zddgg.mall.product.bean.category.backend.req;
 
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class BackendCategoryCreateReqVo {
+public class BackendCategoryUpdateReqVo {
 
     private String categoryId;
 

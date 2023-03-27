@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,27 +46,7 @@ public class AttrSaleBizServiceImpl implements AttrSaleBizService {
                                 AttrSaleKey::getAttrName, req.getAttrName())
         );
         if (!CollectionUtils.isEmpty(page.getRecords())) {
-            List<String> keyIds = page.getRecords().stream().map(AttrSaleKey::getAttrId)
-                    .collect(Collectors.toList());
-            Map<String, List<AttrSaleRecordRespVo.AttrSaleValueVo>> saleValueVoMap = attrSaleValueService.list(
-                            new LambdaQueryWrapper<AttrSaleValue>().in(AttrSaleValue::getAttrId, keyIds))
-                    .stream()
-                    .map((attrSaleValue -> {
-                        AttrSaleRecordRespVo.AttrSaleValueVo attrSaleValueVo = new AttrSaleRecordRespVo.AttrSaleValueVo();
-                        attrSaleValueVo.setAttrId(attrSaleValue.getAttrId());
-                        attrSaleValueVo.setAttrValueId(attrSaleValue.getAttrId());
-                        attrSaleValueVo.setAttrValueName(attrSaleValue.getAttrValueName());
-                        return attrSaleValueVo;
-                    }))
-                    .collect(Collectors.groupingBy(AttrSaleRecordRespVo.AttrSaleValueVo::getAttrId));
-            List<AttrSaleRecordRespVo> respVoList = page.getRecords().stream()
-                    .map(attrSaleKey -> {
-                        AttrSaleRecordRespVo respVo = new AttrSaleRecordRespVo();
-                        respVo.setAttrId(attrSaleKey.getAttrId());
-                        respVo.setAttrName(attrSaleKey.getAttrName());
-                        respVo.setAttrSaleValues(saleValueVoMap.get(attrSaleKey.getAttrId()));
-                        return respVo;
-                    }).collect(Collectors.toList());
+            List<AttrSaleRecordRespVo> respVoList = getRecordListByAttrSaleKeys(page.getRecords());
             result.setRecords(respVoList);
             result.setPages(page.getPages());
             result.setCurrent(page.getCurrent());
@@ -126,5 +107,42 @@ public class AttrSaleBizServiceImpl implements AttrSaleBizService {
         respVo.setAttrName(saleKey.getAttrName());
         respVo.setAttrSaleValues(valueVoList);
         return respVo;
+    }
+
+    @Override
+    public List<AttrSaleRecordRespVo> getRecordListByAttrSaleKeys(List<AttrSaleKey> attrSaleKeys) {
+        List<String> keyIds = attrSaleKeys.stream().map(AttrSaleKey::getAttrId)
+                .collect(Collectors.toList());
+        Map<String, List<AttrSaleRecordRespVo.AttrSaleValueVo>> saleValueVoMap = attrSaleValueService.list(
+                        new LambdaQueryWrapper<AttrSaleValue>().in(AttrSaleValue::getAttrId, keyIds))
+                .stream()
+                .map((attrSaleValue -> {
+                    AttrSaleRecordRespVo.AttrSaleValueVo attrSaleValueVo = new AttrSaleRecordRespVo.AttrSaleValueVo();
+                    attrSaleValueVo.setAttrId(attrSaleValue.getAttrId());
+                    attrSaleValueVo.setAttrValueId(attrSaleValue.getAttrId());
+                    attrSaleValueVo.setAttrValueName(attrSaleValue.getAttrValueName());
+                    return attrSaleValueVo;
+                }))
+                .collect(Collectors.groupingBy(AttrSaleRecordRespVo.AttrSaleValueVo::getAttrId));
+        return attrSaleKeys.stream()
+                .map(attrSaleKey -> {
+                    AttrSaleRecordRespVo respVo = new AttrSaleRecordRespVo();
+                    respVo.setAttrId(attrSaleKey.getAttrId());
+                    respVo.setAttrName(attrSaleKey.getAttrName());
+                    respVo.setAttrSaleValues(saleValueVoMap.get(attrSaleKey.getAttrId()));
+                    return respVo;
+                }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttrSaleRecordRespVo> getRecordListByAttrIds(List<String> attrIds) {
+        if (CollectionUtils.isEmpty(attrIds)) {
+            return new ArrayList<>();
+        }
+        List<AttrSaleKey> attrSaleKeys = attrSaleKeyService.list(
+                new LambdaQueryWrapper<AttrSaleKey>()
+                        .in(AttrSaleKey::getAttrId, attrIds)
+        );
+        return getRecordListByAttrSaleKeys(attrSaleKeys);
     }
 }

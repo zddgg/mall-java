@@ -1,15 +1,23 @@
-package com.zddgg.mall.product.controller;
+package com.zddgg.mall.product.controller.category;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zddgg.mall.common.response.PaginationRes;
 import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.bean.*;
+import com.zddgg.mall.product.bean.attr.resp.AttrSaleRecordRespVo;
+import com.zddgg.mall.product.bean.category.backend.req.BackendCategoryCreateReqVo;
+import com.zddgg.mall.product.bean.category.backend.req.BackendCategoryDetailReqVo;
+import com.zddgg.mall.product.bean.category.backend.req.BackendCategoryUpdateReqVo;
+import com.zddgg.mall.product.biz.AttrSaleBizService;
+import com.zddgg.mall.product.biz.BackendCategoryBizService;
 import com.zddgg.mall.product.constant.StatusEnum;
 import com.zddgg.mall.product.entity.AttrSaleKey;
 import com.zddgg.mall.product.entity.BackendCategory;
 import com.zddgg.mall.product.entity.CategoryPropertySale;
 import com.zddgg.mall.product.exception.BizException;
-import com.zddgg.mall.product.service.*;
+import com.zddgg.mall.product.service.AttrSaleKeyService;
+import com.zddgg.mall.product.service.BackendCategoryService;
+import com.zddgg.mall.product.service.CategoryPropertySaleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +31,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("backendCategory")
+@RequestMapping("category/backend")
 @RequiredArgsConstructor
 public class BackendCategoryController {
 
@@ -35,7 +43,7 @@ public class BackendCategoryController {
 
     private final CategoryPropertySaleService categoryPropertySaleService;
 
-    private final PropertySaleBizService propertySaleBizService;
+    private final AttrSaleBizService attrSaleBizService;
 
     @PostMapping("list")
     public Result<PaginationRes<BackendCategoryNode>> list(@RequestBody BackendCategoryListVo vo) {
@@ -64,7 +72,7 @@ public class BackendCategoryController {
     }
 
     @PostMapping("update")
-    public Result<Objects> update(@RequestBody BackendCategoryCreateReqVo reqVo) {
+    public Result<Objects> update(@RequestBody BackendCategoryUpdateReqVo reqVo) {
         backendCategoryBizService.update(reqVo);
         return Result.success();
     }
@@ -101,7 +109,7 @@ public class BackendCategoryController {
     }
 
     @PostMapping("queryAttrSaleList")
-    public Result<Object> queryAttrSaleList(@RequestBody BackendCategoryAttrReqVo reqVo) {
+    public Result<List<AttrSaleRecordRespVo>> queryAttrSaleList(@RequestBody BackendCategoryAttrReqVo reqVo) {
         BackendCategory backendCategory = backendCategoryService.getOne(
                 new LambdaQueryWrapper<BackendCategory>()
                         .eq(BackendCategory::getCategoryId, reqVo.getCategoryId()));
@@ -111,11 +119,11 @@ public class BackendCategoryController {
         List<CategoryPropertySale> propertySaleList = categoryPropertySaleService.list(
                 new LambdaQueryWrapper<CategoryPropertySale>()
                         .eq(CategoryPropertySale::getCategoryId, reqVo.getCategoryId()));
-        List<AttrSaleKey> attrSaleKeys = new ArrayList<>();
+        List<AttrSaleRecordRespVo> attrSaleKeys = new ArrayList<>();
         if (!CollectionUtils.isEmpty(propertySaleList)) {
             List<String> attrIds = propertySaleList.stream().map(CategoryPropertySale::getPropertySaleId)
                     .collect(Collectors.toList());
-            attrSaleKeys = propertySaleBizService.getListAndRelatedByPropertyIds(attrIds);
+            attrSaleKeys = attrSaleBizService.getRecordListByAttrIds(attrIds);
         }
         return Result.success(attrSaleKeys);
     }
