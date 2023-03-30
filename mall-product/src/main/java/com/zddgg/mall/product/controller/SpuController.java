@@ -94,11 +94,11 @@ public class SpuController {
 
     @PostMapping("delete")
     public Result<Object> delete(@RequestBody SpuDetailReqVo req) {
-        SkuMeta skuMeta = skuMetaService.getOne(
+        List<SkuMeta> skuMetas = skuMetaService.list(
                 new LambdaQueryWrapper<SkuMeta>()
                         .eq(SkuMeta::getSpuId, req.getSpuId()));
-        if (Objects.nonNull(skuMeta)) {
-            throw new BizException("存在商品, 商品编号：" + skuMeta.getSkuId() + ", 删除失败");
+        if (!CollectionUtils.isEmpty(skuMetas)) {
+            throw new BizException("存在商品, 商品编号：" + skuMetas.get(0).getSkuId() + ", 删除失败");
         }
         spuMetaService.remove(
                 new LambdaQueryWrapper<SpuMeta>()
@@ -188,8 +188,8 @@ public class SpuController {
                 .map((item) -> {
                     SpuAttrSale spuAttrSale = new SpuAttrSale();
                     spuAttrSale.setSpuId(spuId);
-                    spuAttrSale.setAttrId(item.getKeyId());
-                    spuAttrSale.setAttrName(item.getKeyName());
+                    spuAttrSale.setAttrId(item.getAttrId());
+                    spuAttrSale.setAttrName(item.getAttrName());
                     spuAttrSale.setStatusFlag(StatusEnum.ENABLED.code);
                     return spuAttrSale;
                 })
