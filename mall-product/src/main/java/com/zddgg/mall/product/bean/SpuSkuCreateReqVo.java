@@ -31,4 +31,24 @@ public class SpuSkuCreateReqVo {
         private String attrValueName;
     }
 
+    @Data
+    public static class AttrSaleRecord {
+
+        private String attrId;
+
+        private String attrName;
+
+        private List<AttrValue> attrSaleValues;
+    }
+
+    @Data
+    public static class AttrValue {
+
+        private String attrId;
+
+        private String attrValueId;
+
+        private String attrValueName;
+    }
+
 }
