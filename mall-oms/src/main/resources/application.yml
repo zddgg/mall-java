@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: mall-staff
+    name: mall-oms
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root

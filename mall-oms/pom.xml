@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mall-staff</artifactId>
+    <artifactId>mall-oms</artifactId>
 
     <dependencies>
         <!--自定义包-->
