@@ -1,11 +1,11 @@
-package com.zddgg.mall.staff;
+package com.zddgg.mall.oms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StaffApplication {
+public class OmsApplication {
     public static void main(String[] args) {
-        SpringApplication.run(StaffApplication.class, args);
+        SpringApplication.run(OmsApplication.class, args);
     }
 }
