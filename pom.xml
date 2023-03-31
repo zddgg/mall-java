@@ -12,6 +12,7 @@
         <module>mall-product</module>
         <module>mall-file</module>
         <module>mall-common</module>
+        <module>mall-staff</module>
     </modules>
 
     <properties>
