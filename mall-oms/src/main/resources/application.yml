@@ -1,5 +1,7 @@
 server:
-  port: 8080
+  port: 8082
+  servlet:
+    context-path: /oms
 
 spring:
   application:
@@ -8,5 +10,4 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
     password: 123456
-    url: jdbc:mysql:///pluto_product?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-
+    url: jdbc:mysql:///mall-oms?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC

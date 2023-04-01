@@ -1,4 +1,4 @@
-package com.zddgg.mall.product.config;
+package com.zddgg.mall.oms.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;

@@ -1,9 +1,13 @@
 package com.zddgg.mall.common.response;
 
 import com.zddgg.mall.common.enums.SystemEnum;
+import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 @Data
+@Builder
+@Accessors(chain = true)
 public class Result<T> {
 
     private String code;
@@ -20,6 +24,10 @@ public class Result<T> {
 
     public static <T> Result<T> success() {
         return custom(SystemEnum.SUCCESS.code, SystemEnum.SUCCESS.msg, null);
+    }
+
+    public static <T> Result<T> success(String msg) {
+        return custom(SystemEnum.SUCCESS.code, msg, null);
     }
 
     public static <T> Result<T> success(T data) {
