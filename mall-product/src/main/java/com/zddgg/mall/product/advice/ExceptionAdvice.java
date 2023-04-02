@@ -3,6 +3,7 @@ package com.zddgg.mall.product.advice;
 import com.zddgg.mall.common.enums.SystemEnum;
 import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.product.exception.BizException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.BindException;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.validation.ConstraintViolationException;
+import java.util.Objects;
 
 @Slf4j
 @ControllerAdvice
@@ -28,7 +29,7 @@ public class ExceptionAdvice {
     @ResponseBody
     public Result<Object> handlerBusinessException(BindException ex) {
         log.error(" BindException ", ex);
-        return Result.fail(ex.getFieldError().getDefaultMessage());
+        return Result.fail(Objects.requireNonNull(ex.getFieldError()).getDefaultMessage());
     }
 
     /**
@@ -38,7 +39,7 @@ public class ExceptionAdvice {
     @ResponseBody
     public Result<Object> handlerBusinessException(MethodArgumentNotValidException ex) {
         log.error(" MethodArgumentNotValidException ", ex);
-        return Result.fail(ex.getFieldError().getDefaultMessage());
+        return Result.fail(Objects.requireNonNull(ex.getFieldError()).getDefaultMessage());
     }
 
     /**

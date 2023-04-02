@@ -1,8 +1,8 @@
 package com.zddgg.mall.product.bean.attr.req;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Data

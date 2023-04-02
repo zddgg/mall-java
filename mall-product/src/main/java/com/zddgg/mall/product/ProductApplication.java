@@ -1,10 +1,10 @@
 package com.zddgg.mall.product;
 
-import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
-@MapperScan(basePackages = "com.zddgg.mall.product.mapper")
+@EnableDiscoveryClient
 @SpringBootApplication
 public class ProductApplication {
 
