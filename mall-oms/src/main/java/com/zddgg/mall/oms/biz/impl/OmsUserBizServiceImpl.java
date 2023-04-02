@@ -83,7 +83,7 @@ public class OmsUserBizServiceImpl implements OmsUserBizService {
         }
 
         String userToken = IdUtil.getUUID();
-        stringRedisTemplate.opsForValue().set("oms-user:" + reqVO.getUsername() + ":token", userToken, 5, TimeUnit.SECONDS);
+        stringRedisTemplate.opsForValue().set("oms-user:" + reqVO.getUsername() + ":token", userToken, 30, TimeUnit.MINUTES);
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", user.getUserId());
