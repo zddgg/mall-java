@@ -1,0 +1,15 @@
+server:
+  port: 7001
+
+spring:
+  application:
+    name: mall-oms-gateway
+  cloud:
+    nacos:
+      discovery:
+        register-enabled: false
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: 123456

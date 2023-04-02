@@ -1,8 +1,7 @@
 package com.zddgg.mall.product.bean;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
 
 @Data
 public class BrandDetailVo {
