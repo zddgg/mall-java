@@ -1,0 +1,22 @@
+server:
+  port: 8086
+  servlet:
+    context-path: /store
+
+spring:
+  application:
+    name: mall-store
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql:///mall-store?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
+dubbo:
+  registry:
+    address: nacos://localhost:8848
+  protocol:
+    name: dubbo
+    port: -1
+  application:
+    name: dubbo-mall-store

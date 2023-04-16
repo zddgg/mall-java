@@ -2,6 +2,7 @@ package com.zddgg.mall.oms.biz.impl;
 
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.zddgg.mall.common.utils.JwtUtil;
 import com.zddgg.mall.oms.biz.OmsUserBizService;
 import com.zddgg.mall.oms.constant.StateFlagEnum;
 import com.zddgg.mall.oms.entity.OmsRole;
@@ -13,7 +14,6 @@ import com.zddgg.mall.oms.service.OmsRoleService;
 import com.zddgg.mall.oms.service.OmsUserRoleService;
 import com.zddgg.mall.oms.service.OmsUserService;
 import com.zddgg.mall.oms.utils.IdUtil;
-import com.zddgg.mall.oms.utils.JwtUtils;
 import com.zddgg.mall.oms.vo.req.OmsUserCreateReqVO;
 import com.zddgg.mall.oms.vo.req.OmsUserLoginReqVO;
 import com.zddgg.mall.oms.vo.resp.OmsUserLoginRespVO;
@@ -88,7 +88,7 @@ public class OmsUserBizServiceImpl implements OmsUserBizService {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", user.getUserId());
         map.put("token", userToken);
-        String token = JwtUtils.createToken(map);
+        String token = JwtUtil.createToken(map);
 
         OmsUserLoginRespVO respVO = new OmsUserLoginRespVO();
         respVO.setUserId(user.getUserId());

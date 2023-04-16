@@ -173,7 +173,7 @@ public class SpuController {
     }
 
     @PostMapping("spuSkuCreate")
-    public Result<Object> deleteAttrSale(@RequestBody SpuSkuCreateReqVo req) {
+    public Result<Object> spuSkuCreate(@RequestBody SpuSkuCreateReqVo req) {
         SpuMeta spuMeta = new SpuMeta();
         String spuId = idService.getId();
         spuMeta.setSpuId(spuId);
@@ -204,6 +204,7 @@ public class SpuController {
             skuMeta.setSpuId(spuId);
             skuMeta.setSkuId(skuId);
             skuMeta.setSkuName(skuItem.getSkuName());
+            skuMeta.setStoreId(spuMeta.getStoreId());
             skuMeta.setRetailPrice(new BigDecimal(skuItem.getRetailPrice()));
             skuMeta.setStatusFlag(StatusEnum.ENABLED.code);
             List<SkuAttrSale> skuAttrSales = skuItem.getAttrList().stream()

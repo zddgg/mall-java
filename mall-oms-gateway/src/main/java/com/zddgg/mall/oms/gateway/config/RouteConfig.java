@@ -39,6 +39,13 @@ public class RouteConfig {
                                         .filter(new OmsTokenCheckFilter(stringRedisTemplate)))
                                 .uri("lb://mall-oms")
                 )
+                .route(
+                        "mall-user-route",
+                        r -> r.path("/api/app/user/**")
+                                .filters(f -> f.stripPrefix(2)
+                                        .filter(new OmsTokenCheckFilter(stringRedisTemplate)))
+                                .uri("lb://mall-user")
+                )
                 .build();
     }
 }
