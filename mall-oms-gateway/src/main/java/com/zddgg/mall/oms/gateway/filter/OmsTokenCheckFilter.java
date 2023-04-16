@@ -2,7 +2,7 @@ package com.zddgg.mall.oms.gateway.filter;
 
 import com.alibaba.fastjson2.JSON;
 import com.zddgg.mall.common.response.Result;
-import com.zddgg.mall.oms.gateway.utils.JwtUtils;
+import com.zddgg.mall.common.utils.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -46,8 +46,8 @@ public class OmsTokenCheckFilter implements GatewayFilter, Ordered {
         String first = request.getHeaders().getFirst("authorization");
         if (StringUtils.isNotBlank(first) && first.split(" ").length == 2) {
             String tokenStr = first.split(" ")[1];
-            if (JwtUtils.verifyToken(tokenStr) == 0) {
-                Map<String, Object> map = JwtUtils.parseToken(tokenStr);
+            if (JwtUtil.verifyToken(tokenStr) == 0) {
+                Map<String, Object> map = JwtUtil.parseToken(tokenStr);
                 String userId = (String) map.get("userId");
                 String token = (String) map.get("token");
                 String redisToken = stringRedisTemplate.opsForValue().get("oms-user:" + userId + ":token");

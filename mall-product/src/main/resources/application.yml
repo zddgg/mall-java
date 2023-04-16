@@ -11,3 +11,14 @@ spring:
     username: root
     password: 123456
     url: jdbc:mysql:///pluto_product?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+
+dubbo:
+  registry:
+    address: nacos://localhost:8848
+  consumer:
+    check: false
+  protocol:
+    name: dubbo
+    port: -1
+  application:
+    name: dubbo-mall-product

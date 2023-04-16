@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -13,6 +14,7 @@ import java.math.BigDecimal;
 @Setter
 public class SkuMeta extends BaseEntity implements Serializable {
 
+    @Serial
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 
@@ -25,8 +27,14 @@ public class SkuMeta extends BaseEntity implements Serializable {
     @TableField(value = "sku_name")
     private String skuName;
 
+    @TableField(value = "store_id")
+    private String storeId;
+
     @TableField(value = "retail_price")
     private BigDecimal retailPrice;
+
+    @TableField(value = "thumbnail")
+    private String thumbnail;
 
     @TableField(value = "status_flag")
     private String statusFlag;
