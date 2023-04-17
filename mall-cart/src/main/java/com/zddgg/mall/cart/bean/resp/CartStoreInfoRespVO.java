@@ -24,6 +24,10 @@ public class CartStoreInfoRespVO {
     @NoArgsConstructor
     public static class CartPreferentialInfo {
 
+        private String preferentialId;
+
+        private String preferentialType;
+
         private String preferentialTitle;
 
         private List<CartSkuInfo> cartSkuInfos;
