@@ -1,8 +1,12 @@
 package com.zddgg.mall.cart.controller.app;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.zddgg.mall.cart.bean.req.CartAddReqVO;
+import com.zddgg.mall.cart.bean.req.CartSelectReqVO;
+import com.zddgg.mall.cart.bean.req.SkuNumUpdateReqVO;
 import com.zddgg.mall.cart.bean.resp.CartStoreInfoRespVO;
+import com.zddgg.mall.cart.biz.CartBizService;
 import com.zddgg.mall.cart.common.CartSelectedFlag;
 import com.zddgg.mall.cart.common.StateFlag;
 import com.zddgg.mall.cart.entity.CartItem;
@@ -12,22 +16,23 @@ import com.zddgg.mall.common.response.Result;
 import com.zddgg.mall.common.utils.IdUtil;
 import com.zddgg.mall.product.api.response.SkuInfo;
 import com.zddgg.mall.product.api.service.SkuQueryService;
-import com.zddgg.mall.store.api.response.StoreInfo;
 import com.zddgg.mall.store.api.service.StoreQueryService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
 public class CartController {
+
+    private final CartBizService cartBizService;
 
     private final CartItemService cartItemService;
 
@@ -40,68 +45,7 @@ public class CartController {
     @PostMapping("getCartList")
     public Result<List<CartStoreInfoRespVO>> getCartList(HttpServletRequest request) {
         String userId = request.getHeader("user-id");
-        if (StringUtils.isBlank(userId)) {
-            return Result.success();
-        }
-        List<CartItem> cartItems = cartItemService.list(
-                new LambdaQueryWrapper<CartItem>()
-                        .eq(CartItem::getUserId, userId));
-
-        Map<String, List<CartItem>> storeId2Cart = cartItems.stream()
-                .collect(Collectors.groupingBy(CartItem::getStoreId));
-
-        Map<String, StoreInfo> storeId2StoreInfopMap = storeQueryService.batchQuery(storeId2Cart.keySet().stream().toList())
-                .stream()
-                .collect(Collectors.toMap(StoreInfo::getStoreId, v -> v));
-
-        Map<String, SkuInfo> skuId2SkuInfoMap = skuQueryService.batchQuery(cartItems.stream().map(CartItem::getSkuId).toList())
-                .stream()
-                .collect(Collectors.toMap(SkuInfo::getSkuId, v -> v));
-
-        List<CartStoreInfoRespVO> respVOList = storeId2Cart.entrySet()
-                .stream()
-                .map(entry -> {
-                    CartStoreInfoRespVO.CartPreferentialInfo cartPreferentialInfo = new CartStoreInfoRespVO.CartPreferentialInfo();
-                    cartPreferentialInfo.setPreferentialTitle("已满1099元，已减200元");
-                    List<CartStoreInfoRespVO.CartSkuInfo> cartSkuInfoList = entry.getValue()
-                            .stream()
-                            .map(cartItem -> {
-                                SkuInfo skuInfo = skuId2SkuInfoMap.get(cartItem.getSkuId());
-                                return CartStoreInfoRespVO.CartSkuInfo
-                                        .builder()
-                                        .cartInfo(
-                                                CartStoreInfoRespVO.CartInfo
-                                                        .builder()
-                                                        .cartId(cartItem.getCartId())
-                                                        .storeId(cartItem.getStoreId())
-                                                        .skuId(cartItem.getSkuId())
-                                                        .skuNum(cartItem.getSkuNum())
-                                                        .addPrice(cartItem.getAddPrice())
-                                                        .selected(StringUtils.equals(CartSelectedFlag.SELECTED.getCode(), cartItem.getSelectedFlag()))
-                                                        .build()
-                                        )
-                                        .skuInfo(
-                                                CartStoreInfoRespVO.SkuInfo
-                                                        .builder()
-                                                        .skuId(skuInfo.getSkuId())
-                                                        .skuName(skuInfo.getSkuName())
-                                                        .thumbnail(skuInfo.getThumbnail())
-                                                        .attrStr("红色，128GB")
-                                                        .retailPrice(skuInfo.getRetailPrice())
-                                                        .build()
-                                        )
-                                        .build();
-                            }).toList();
-                    cartPreferentialInfo.setCartSkuInfos(cartSkuInfoList);
-                    return CartStoreInfoRespVO
-                            .builder()
-                            .storeId(entry.getKey())
-                            .storeName((storeId2StoreInfopMap.get(entry.getKey()).getStoreName()))
-                            .cartPreferentialInfos(Collections.singletonList(cartPreferentialInfo))
-                            .build();
-                }).toList();
-
-        return Result.success(respVOList);
+        return Result.success(cartBizService.getCartListByUserId(userId));
     }
 
     @PostMapping("addCart")
@@ -143,5 +87,56 @@ public class CartController {
         cartItem.setStateFlag(StateFlag.ENABLED.code);
         cartItemService.save(cartItem);
         return Result.success();
+    }
+
+    @PostMapping("selectCart")
+    public Result<List<CartStoreInfoRespVO>> selectCart(HttpServletRequest request,
+                                                        @RequestBody CartSelectReqVO reqVO) {
+        String userId = request.getHeader("user-id");
+        if (StringUtils.isBlank(userId)) {
+            throw new BizException("50008", "");
+        }
+        if (Arrays.asList("2", "3").contains(reqVO.getActionType())) {
+            CartSelectedFlag selectedFlag;
+            if (StringUtils.equals(reqVO.getActionType(), "2")) {
+                selectedFlag = CartSelectedFlag.NOT_SELECTED;
+            } else {
+                selectedFlag = CartSelectedFlag.SELECTED;
+            }
+            cartItemService.update(
+                    new LambdaUpdateWrapper<CartItem>()
+                            .set(CartItem::getSelectedFlag, selectedFlag.getCode())
+                            .eq(CartItem::getUserId, userId));
+        } else {
+            List<String> cartIds = new HashSet<>(reqVO.getCartIds()).stream().toList();
+            if (!CollectionUtils.isEmpty(cartIds)
+                    && Arrays.stream(CartSelectedFlag.values()).map(CartSelectedFlag::getCode)
+                    .toList().contains(reqVO.getActionType())) {
+                cartItemService.update(
+                        new LambdaUpdateWrapper<CartItem>()
+                                .set(CartItem::getSelectedFlag, reqVO.getActionType())
+                                .in(CartItem::getCartId, cartIds)
+                                .eq(CartItem::getUserId, userId));
+            }
+        }
+        return Result.success(cartBizService.getCartListByUserId(userId));
+    }
+
+    @PostMapping("updateSkuNum")
+    public Result<List<CartStoreInfoRespVO>> selectCart(HttpServletRequest request,
+                                                        @RequestBody SkuNumUpdateReqVO reqVO) {
+        String userId = request.getHeader("user-id");
+        if (StringUtils.isBlank(userId)) {
+            throw new BizException("50008", "");
+        }
+
+        String action = StringUtils.equals(reqVO.getActionType(), "0") ? "-" : "+";
+
+        cartItemService.update(
+                new LambdaUpdateWrapper<CartItem>()
+                        .setSql("sku_num = sku_num " + action + " 1")
+                        .eq(CartItem::getCartId, reqVO.getCartId())
+                        .eq(CartItem::getUserId, userId));
+        return Result.success(cartBizService.getCartListByUserId(userId));
     }
 }
