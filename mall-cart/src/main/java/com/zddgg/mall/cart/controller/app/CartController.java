@@ -3,6 +3,7 @@ package com.zddgg.mall.cart.controller.app;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.zddgg.mall.cart.bean.req.CartAddReqVO;
+import com.zddgg.mall.cart.bean.req.CartDeleteReqVO;
 import com.zddgg.mall.cart.bean.req.CartSelectReqVO;
 import com.zddgg.mall.cart.bean.req.SkuNumUpdateReqVO;
 import com.zddgg.mall.cart.bean.resp.CartStoreInfoRespVO;
@@ -137,6 +138,23 @@ public class CartController {
                         .setSql("sku_num = sku_num " + action + " 1")
                         .eq(CartItem::getCartId, reqVO.getCartId())
                         .eq(CartItem::getUserId, userId));
+        return Result.success(cartBizService.getCartListByUserId(userId));
+    }
+
+    @PostMapping("deleteCart")
+    public Result<List<CartStoreInfoRespVO>> deleteCart(HttpServletRequest request,
+                                                        @RequestBody CartDeleteReqVO reqVO) {
+        String userId = request.getHeader("user-id");
+        if (StringUtils.isBlank(userId)) {
+            throw new BizException("50008", "");
+        }
+
+        if (StringUtils.isNoneBlank(reqVO.getCartId())) {
+            cartItemService.remove(
+                    new LambdaQueryWrapper<CartItem>()
+                            .eq(CartItem::getCartId, reqVO.getCartId())
+                            .eq(CartItem::getUserId, userId));
+        }
         return Result.success(cartBizService.getCartListByUserId(userId));
     }
 }
